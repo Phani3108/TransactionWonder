@@ -64,8 +64,8 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P0-1** — Tenant context hardening | ✅ Done | Transaction-scoped RLS session vars. Fixes pool bleed + SET injection. |
 | **R** — Drop "ClawKeeper" brand | ✅ Done | Single name everywhere: **TransactionWonder**. CEO agent ID is now `ceo`. |
 | **P0-2** — RLS isolation test suite | ✅ Done | 7 integration tests prove tenant A can’t read B, viewer can’t write, WITH CHECK blocks cross-tenant INSERTs, super_admin can. |
-| P0-3 — CEO → orchestrator real delegation | ⏳ Next | Replace the mock `delegate_to()` with a real call. |
-| P0-4 — Orchestrator → worker dispatch (AP Lead) | ⏳ Next | First vertical slice that actually uses workers. |
+| **P0-3** — CEO → orchestrator real delegation | ✅ Done | `delegate_to()` now actually calls the orchestrator via `agent_runtime` and propagates errors. |
+| **P0-4** — AP Lead → worker dispatch | ✅ Done | AP Lead routes each capability to the matching worker via `agent_runtime`. Reference impl for the other 8 orchestrators. |
 | P0-5 — Skill executor MVP | ⏳ Next | `invokeSkill()` + Zod schemas for `invoice-processor` + `payment-gateway`. |
 | P0-6 — Task timeout | ⏳ Next | `Promise.race` wrapper so hung LLM calls don’t block forever. |
 | P0-7 — Memory store tenant context | ⏳ Next | Memory queries go through the same wrapper. |
@@ -74,7 +74,22 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 
 ---
 
-## ✅ Latest phase: **P0-2 — RLS isolation test suite** (2026-04-17)
+## ✅ Latest phase: **P0-3 + P0-4 — Real CEO delegation & AP Lead → worker dispatch** (2026-04-17)
+
+### 🎯 What changed
+
+- 🧑‍✈️ **CEO `delegate_to()` is real now.** Looks up the orchestrator through `agent_runtime`, calls `execute_task()` with the current tenant context, and throws on orchestrator failure (previously returned a silent mock).
+- 🏢 **AP Lead dispatches to workers.** `AccountsPayableLeadAgent.execute()` now routes each `required_capability` to the matching worker ID via a tiny capability→worker table (e.g. `invoice_parsing → ap_invoice_parser`).
+- 🔁 **Reference implementation.** The same dispatch pattern (capability table + `dispatch_to_worker()` + `fallback_local()`) will be copied into the other 8 orchestrators in P1-5.
+- 🪢 **Module cycle handled.** Both CEO and AP Lead use `await import('./index')` / `await import('../index')` inside the dispatch function so the `index.ts ↔ agent.ts` circular import resolves cleanly.
+
+### ⚠️ Known caveat
+
+- Workers are still `WorkerAgent` stubs (templated responses). Dispatch is real and tested — but actual worker logic (OCR, validation, payment) lands in **P0-5** (skill executor) and **P1-5** (worker behavior). Until then, the hierarchy returns stub output from workers, which is the correct scaffolding state for this phase.
+
+---
+
+## 📜 Previous phase: **P0-2 — RLS isolation test suite** (2026-04-17)
 
 ### 🎯 What changed
 

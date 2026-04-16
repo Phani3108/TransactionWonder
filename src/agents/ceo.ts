@@ -154,13 +154,28 @@ export class CeoAgent extends BaseAgent {
   ): Promise<Record<string, unknown>> {
     console.log(`[TransactionWonder] Delegating to ${orchestrator_id}`);
 
-    // In full implementation, this would call the actual orchestrator agent
-    // For now, return simulated result
+    // Lazy-import the runtime to break the index.ts ↔ ceo.ts module cycle.
+    const { agent_runtime } = await import('./index');
+
+    const tenant = this.ensure_tenant_context();
+    const orchestrator = await agent_runtime.get_agent(orchestrator_id);
+    const result = await orchestrator.execute_task(
+      { ...task, assigned_agent: orchestrator_id },
+      tenant
+    );
+
+    if (!result.success) {
+      throw new Error(
+        `Orchestrator ${orchestrator_id} failed task ${task.id}: ${result.error ?? 'unknown error'}`
+      );
+    }
+
     return {
       delegated_to: orchestrator_id,
       task_id: task.id,
-      status: 'delegated',
-      message: `Task delegated to ${orchestrator_id}`,
+      status: 'completed',
+      duration_ms: result.duration_ms,
+      output: result.output,
     };
   }
 
