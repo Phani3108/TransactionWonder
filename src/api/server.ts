@@ -20,6 +20,7 @@ import { create_activity_routes } from './routes/activity';
 import { create_vendor_routes } from './routes/vendors';
 import { create_customer_routes } from './routes/customers';
 import { create_metrics_routes } from './routes/metrics';
+import { webhook_routes } from './routes/webhooks';
 import type { AppEnv } from '../types/hono';
 
 // Database connection (module-scoped pool). Never use this client directly
@@ -37,6 +38,12 @@ const app = new Hono<AppEnv>();
 // Middleware
 app.use('*', cors());
 app.use('*', logger());
+
+// Webhook routes are mounted BEFORE the tenant-context middleware because
+// they're unauthenticated inbound calls from third parties (Stripe, Plaid).
+// Authenticity is proven by per-provider signature verification inside
+// each handler, not by a JWT.
+app.route('/webhooks', webhook_routes(sql));
 
 // Guardrails middleware (rate limiting, PII detection, injection detection)
 app.use('/api/*', guardrails_middleware);
@@ -81,13 +88,15 @@ app.use('/api/*', async (c, next) => {
     return c.json({ error: 'Server configuration error' }, 500);
   }
 
-  let decoded: { tenant_id: string; user_id: string; role: string };
+  let decoded: {
+    tenant_id: string;
+    user_id: string;
+    role: string;
+    jti?: string;
+    token_type?: 'access' | 'refresh';
+  };
   try {
-    decoded = jwt.verify(token, jwt_secret) as {
-      tenant_id: string;
-      user_id: string;
-      role: string;
-    };
+    decoded = jwt.verify(token, jwt_secret) as typeof decoded;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       return c.json({ error: 'Token expired' }, 401);
@@ -101,6 +110,30 @@ app.use('/api/*', async (c, next) => {
 
   if (!decoded.tenant_id || !decoded.user_id || !decoded.role) {
     return c.json({ error: 'Token missing required claims' }, 401);
+  }
+
+  // Refresh tokens must use /auth/refresh, not bearer API access.
+  if (decoded.token_type === 'refresh') {
+    return c.json({ error: 'Refresh token cannot be used for API access' }, 401);
+  }
+
+  // Revocation check. Runs on the pool client (no tenant context needed —
+  // lookup is by opaque jti). If the jti is blacklisted we reject before
+  // opening the tenant transaction.
+  if (decoded.jti) {
+    try {
+      const rows = await sql<{ jti: string }[]>`
+        SELECT jti FROM revoked_tokens WHERE jti = ${decoded.jti} LIMIT 1
+      `;
+      if (rows.length > 0) {
+        return c.json({ error: 'Token revoked' }, 401);
+      }
+    } catch (e) {
+      // If the revoked_tokens table is missing (migrations not applied)
+      // we log and continue rather than hard-failing — the revocation
+      // check is a belt-and-braces over short-lived tokens.
+      console.warn('[Auth] Revocation check failed:', e);
+    }
   }
 
   c.set('tenant_id', decoded.tenant_id);

@@ -79,12 +79,29 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P1-6** — Remaining 6 skills | ✅ Done | `document-parser`, `bank-reconciliation`, `compliance-checker`, `financial-reporting`, `data-sync`, `audit-trail` — all 8 skills now registered and callable via `invokeSkill()`. |
 | **P1-4** — Stripe idempotency wired | ✅ Done | `StripeClient.request` accepts + forwards `Idempotency-Key`; `payment-gateway` passes its deterministic key; vendor_name removed from Stripe metadata. |
 | **P1-2** — OAuth token persistence | ✅ Done | `oauth_tokens` table (RLS-enabled) + `TokenManager` with AES-256-GCM encryption and auto-refresh via pluggable refreshers. |
-| *Remaining P1 items* | 🗓️ Planned | Webhooks (P1-3), JWT refresh (P1-7). |
+| **P1-3** — Webhook router | ✅ Done | `/webhooks/stripe` verifies Stripe-Signature HMAC + timestamp window; `/webhooks/plaid` accepts signed events (JWKS verification tracked for P2). |
+| **P1-7** — JWT refresh + revocation | ✅ Done | 1h access + 30d refresh tokens with jti claim; `/auth/refresh` rotates; `/auth/logout` revokes; middleware checks `revoked_tokens` blacklist. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P1-4 + P1-2 — Stripe idempotency & OAuth token persistence** (2026-04-17)
+## ✅ Latest phase: **P1-3 + P1-7 — Webhooks & JWT refresh** (2026-04-17)
+
+### 🎯 What changed
+
+- 🪝 **P1-3: `/webhooks/*` router** mounted *before* the tenant-context middleware (webhooks are unauthenticated inbound; authenticity is per-provider signature).
+  - **Stripe**: verifies `Stripe-Signature` (HMAC-SHA256 of `timestamp.body` against `STRIPE_WEBHOOK_SECRET`), rejects outside a 5-minute window, timing-safe compare.
+  - **Plaid**: checks for `Plaid-Verification` header; full JWKS-based JWT verification is tracked in P2 (needs key cache).
+- 🔐 **P1-7: Refresh tokens + revocation.**
+  - Migration `005_create_revoked_tokens.sql` — blacklist keyed by `jti`, no RLS (lookup happens pre-tenant-context).
+  - `auth.ts` now issues a pair on login: 1h **access** token + 30d **refresh** token, both carrying `jti`.
+  - `POST /auth/refresh` validates the refresh JWT, rejects if revoked, **rotates** (old jti goes on the blacklist), issues a fresh pair.
+  - `POST /auth/logout` revokes whatever token(s) were presented.
+  - `server.ts` middleware rejects refresh tokens used as bearer access tokens, and checks the `revoked_tokens` blacklist before opening the tenant transaction.
+
+---
+
+## 📜 Previous phase: **P1-4 + P1-2 — Stripe idempotency & OAuth token persistence** (2026-04-17)
 
 ### 🎯 What changed
 
