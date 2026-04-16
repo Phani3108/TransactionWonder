@@ -66,18 +66,24 @@ export const paymentGateway: SkillDefinition<PaymentGatewayInput, PaymentGateway
     }
 
     const client = getStripeClient();
-    const intent = await client.createPaymentIntent({
-      amount: input.amount_cents,
-      currency: input.currency ?? 'usd',
-      customerId: input.customer_id,
-      description:
-        input.description ??
-        `TransactionWonder invoice ${input.invoice_id}`,
-      metadata: {
-        tenant_id: ctx.tenant_id,
-        invoice_id: input.invoice_id,
+    const intent = await client.createPaymentIntent(
+      {
+        amount: input.amount_cents,
+        currency: input.currency ?? 'usd',
+        customerId: input.customer_id,
+        description:
+          input.description ??
+          `TransactionWonder invoice ${input.invoice_id}`,
+        // Note: we intentionally do NOT include vendor_name in metadata.
+        // Stripe metadata is visible to anyone with dashboard access and
+        // is frequently logged; PII-free identifiers only (P2-1).
+        metadata: {
+          tenant_id: ctx.tenant_id,
+          invoice_id: input.invoice_id,
+        },
       },
-    });
+      { idempotencyKey: key }
+    );
 
     return {
       payment_intent_id: intent.id,

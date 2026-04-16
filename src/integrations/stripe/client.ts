@@ -72,17 +72,24 @@ export class StripeClient {
   }
 
   /**
-   * Make an authenticated request to the Stripe API
+   * Make an authenticated request to the Stripe API.
+   * Optional `idempotencyKey` is sent as the `Idempotency-Key` header —
+   * Stripe deduplicates requests with the same key for 24h, so retries
+   * with the same key can't double-charge. See P1-4.
    */
   private async request<T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'DELETE' = 'POST',
-    body?: Record<string, unknown>
+    body?: Record<string, unknown>,
+    idempotencyKey?: string
   ): Promise<T> {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.config.secretKey}`,
       'Stripe-Version': this.config.apiVersion!,
     };
+    if (idempotencyKey) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
 
     let requestBody: string | undefined;
 
@@ -134,8 +141,15 @@ export class StripeClient {
   /**
    * Create a PaymentIntent for collecting a payment
    * Returns a client_secret for use with Stripe.js
+   *
+   * `options.idempotencyKey` is strongly recommended for payment creation:
+   * Stripe will dedupe retries with the same key and return the previously
+   * created intent instead of charging twice. See P1-4.
    */
-  async createPaymentIntent(request: CreatePaymentIntentRequest): Promise<PaymentIntent> {
+  async createPaymentIntent(
+    request: CreatePaymentIntentRequest,
+    options?: { idempotencyKey?: string }
+  ): Promise<PaymentIntent> {
     const response = await this.request<{
       id: string;
       object: 'payment_intent';
@@ -173,7 +187,7 @@ export class StripeClient {
       capture_method: request.captureMethod,
       confirmation_method: request.confirmationMethod,
       setup_future_usage: request.setupFutureUsage,
-    });
+    }, options?.idempotencyKey);
 
     return this.mapPaymentIntent(response);
   }

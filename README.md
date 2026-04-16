@@ -77,12 +77,28 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P1-11** — PII redaction on LLM path | ✅ Done | `llm.complete()` redacts PII by default (`redact_pii: true`). Opt-out for callers that pre-redact. |
 | **P1-5** — Remaining orchestrators dispatch | ✅ Done | CFO, AR Lead, Reconciliation, Compliance, Reporting, Integration, Data/ETL, Support all route via shared `_dispatch.ts` helper. |
 | **P1-6** — Remaining 6 skills | ✅ Done | `document-parser`, `bank-reconciliation`, `compliance-checker`, `financial-reporting`, `data-sync`, `audit-trail` — all 8 skills now registered and callable via `invokeSkill()`. |
-| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency hardening, JWT refresh. |
+| **P1-4** — Stripe idempotency wired | ✅ Done | `StripeClient.request` accepts + forwards `Idempotency-Key`; `payment-gateway` passes its deterministic key; vendor_name removed from Stripe metadata. |
+| **P1-2** — OAuth token persistence | ✅ Done | `oauth_tokens` table (RLS-enabled) + `TokenManager` with AES-256-GCM encryption and auto-refresh via pluggable refreshers. |
+| *Remaining P1 items* | 🗓️ Planned | Webhooks (P1-3), JWT refresh (P1-7). |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P1-6 — Remaining 6 skills** (2026-04-17)
+## ✅ Latest phase: **P1-4 + P1-2 — Stripe idempotency & OAuth token persistence** (2026-04-17)
+
+### 🎯 What changed
+
+- 💳 **P1-4: Stripe idempotency.** `StripeClient.request()` now accepts and forwards an `Idempotency-Key` header. `createPaymentIntent()` has a new `options.idempotencyKey` parameter. `payment-gateway` skill (P0-5) passes its deterministic `hash(tenant_id | invoice_id | amount)` key through, so a retry can never double-charge.
+- 🔒 **PII removed from Stripe metadata.** `vendor_name` no longer rides along; only tenant/invoice IDs go to Stripe metadata, which isn’t treated as private.
+- 🗝️ **P1-2: OAuth token persistence.**
+  - 🆕 `db/migrations/004_create_oauth_tokens.sql` — `oauth_tokens` table with RLS (`tenant_id = current_setting('app.current_tenant_id')`), unique on (tenant, provider, realm).
+  - 🆕 `src/integrations/crypto.ts` — AES-256-GCM helpers using `OAUTH_ENCRYPTION_KEY` (base64, 32 bytes). Authenticated encryption; tampered ciphertext throws.
+  - 🆕 `src/integrations/token-manager.ts` — `TokenManager` with `get` / `upsert` / `revoke` / `registerRefresher`. Auto-refreshes tokens within 60s of expiry via provider-specific refreshers; falls back to stale token on refresh failure.
+- 🧭 **How it plugs in.** QuickBooks / Xero clients register their own refreshers on module load; their existing `exchangeCodeForTokens()` + `refreshAccessToken()` methods become the refresh impl. Wiring those registrations is small and will follow in the webhook phase (P1-3) where real OAuth flows are exercised.
+
+---
+
+## 📜 Previous phase: **P1-6 — Remaining 6 skills** (2026-04-17)
 
 ### 🎯 What changed — every documented skill now has a live handler
 
