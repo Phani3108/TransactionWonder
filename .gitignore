@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+dashboard/node_modules/
+
+# Build artifacts
+dist/
+build/
+dashboard/dist/
+dashboard/build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+bun-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Bun — keep bun.lock for reproducible installs
+
+# npm / yarn lockfiles (this project uses bun.lock as canonical)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Python virtualenvs used by demo pipeline
+src/demo/download/venv/
+src/demo/download/__pycache__/
+src/demo/download/*.pyc
+
+# Generated demo data
+src/demo/data/generated/
+src/demo/data/downloaded/
+
+# Test artifacts
+coverage/
+.nyc_output/
