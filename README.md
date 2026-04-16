@@ -63,7 +63,7 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 |---|---|---|
 | **P0-1** — Tenant context hardening | ✅ Done | Transaction-scoped RLS session vars. Fixes pool bleed + SET injection. |
 | **R** — Drop "ClawKeeper" brand | ✅ Done | Single name everywhere: **TransactionWonder**. CEO agent ID is now `ceo`. |
-| P0-2 — RLS isolation test suite | ⏳ Next | End-to-end tests for tenant A can’t read tenant B, etc. |
+| **P0-2** — RLS isolation test suite | ✅ Done | 7 integration tests prove tenant A can’t read B, viewer can’t write, WITH CHECK blocks cross-tenant INSERTs, super_admin can. |
 | P0-3 — CEO → orchestrator real delegation | ⏳ Next | Replace the mock `delegate_to()` with a real call. |
 | P0-4 — Orchestrator → worker dispatch (AP Lead) | ⏳ Next | First vertical slice that actually uses workers. |
 | P0-5 — Skill executor MVP | ⏳ Next | `invokeSkill()` + Zod schemas for `invoice-processor` + `payment-gateway`. |
@@ -74,7 +74,30 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 
 ---
 
-## ✅ Latest phase: **R — Drop "ClawKeeper" brand** (2026-04-17)
+## ✅ Latest phase: **P0-2 — RLS isolation test suite** (2026-04-17)
+
+### 🎯 What changed
+
+- 🧪 **New test file** at `tests/rls/isolation.test.ts` — 7 integration tests that spin up real data in two tenants and prove RLS blocks cross-tenant reads and writes through `withTenantContext()`.
+- 🔒 **What’s proved**:
+  - Tenant A sees exactly its own invoices; Tenant B likewise.
+  - An `UPDATE` from tenant A aimed at tenant B’s rows → 0 rows affected.
+  - `viewer` role cannot `INSERT` invoices (WITH CHECK blocks it).
+  - `accountant` can insert in their own tenant but **not** with a spoofed `tenant_id` (cross-tenant WITH CHECK blocks it).
+  - `super_admin` can read across tenants — the intended bypass, confirmed to work.
+- 🧹 **Fixtures are self-contained** — UUIDs per run, clean-up in `afterAll`, no cross-test collisions.
+
+### 🧪 How to run
+
+```bash
+DATABASE_URL=postgres://user:pass@localhost:5432/transactionwonder bun test tests/rls
+```
+
+Self-skips without `DATABASE_URL`, same pattern as P0-1.
+
+---
+
+## 📜 Previous phase: **R — Drop "ClawKeeper" brand** (2026-04-17)
 
 ### 🎯 What changed
 
