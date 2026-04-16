@@ -99,25 +99,12 @@ CREATE POLICY invoice_tenant_isolation ON invoices
         is_super_admin() OR tenant_id = current_tenant_id()
     );
 
--- Viewers can only read invoices
-CREATE POLICY invoice_viewer_read ON invoices
-    FOR SELECT
-    USING (
-        tenant_id = current_tenant_id() AND current_user_role() IN ('viewer', 'accountant', 'tenant_admin', 'super_admin')
-    );
-
--- Only accountants and admins can modify invoices
-CREATE POLICY invoice_accountant_write ON invoices
-    FOR INSERT
-    WITH CHECK (
-        tenant_id = current_tenant_id() AND current_user_role() IN ('accountant', 'tenant_admin', 'super_admin')
-    );
-
-CREATE POLICY invoice_accountant_update ON invoices
-    FOR UPDATE
-    USING (
-        tenant_id = current_tenant_id() AND current_user_role() IN ('accountant', 'tenant_admin', 'super_admin')
-    );
+-- P2-2: The three role-based invoice policies that used to live here
+-- (invoice_viewer_read, invoice_accountant_write, invoice_accountant_update)
+-- duplicated app-layer role checks and added nothing that tenant_isolation
+-- above didn't already cover. They've been removed. Role-based access is
+-- enforced at the API layer in src/api/routes/invoices.ts. RLS here keeps
+-- its single responsibility: tenant isolation.
 
 -- ============================================================================
 -- Reconciliation Policies

@@ -189,29 +189,10 @@ app.get('/ws', (c) => {
   }, 501);
 });
 
-// Start server
+// Start server. Canonical default port is 4004; override with PORT env.
+// (P2-10: previous code had an inconsistent EXPECTED_PORT=9100 warning
+// that fired for everyone using the default.)
 const port = Number(process.env.PORT) || 4004;
-
-// Validate port configuration
-const EXPECTED_PORT = 9100;
-if (port !== EXPECTED_PORT) {
-  console.error(`
-╔═════════════════════════════════════════════════════════════════╗
-║  ⚠️  PORT CONFIGURATION MISMATCH DETECTED                       ║
-╚═════════════════════════════════════════════════════════════════╝
-
-Expected Port: ${EXPECTED_PORT}
-Current Port:  ${port}
-
-This mismatch will cause the dashboard to fail connecting to the API.
-
-ACTION REQUIRED:
-1. Update your .env file: PORT=${EXPECTED_PORT}
-2. Restart the API server
-
-Continuing with port ${port} anyway, but connections may fail...
-`);
-}
 
 console.log(`
 ╔═════════════════════════════════════════════════════════════════╗

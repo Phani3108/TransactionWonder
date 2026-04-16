@@ -6,7 +6,9 @@ import type { Sql } from 'postgres';
 import bcrypt from 'bcryptjs';
 
 export async function seed_users(sql: Sql<Record<string, unknown>>, tenant_id: string): Promise<string> {
-  const password_hash = await bcrypt.hash('Demo123!', 10);
+  // P2-4: bumped bcrypt work factor 10 → 12. Modern recommendation for
+  // financial systems is ≥12; adds ~50ms per hash, negligible at seed time.
+  const password_hash = await bcrypt.hash('Demo123!', 12);
   
   const users = [
     {

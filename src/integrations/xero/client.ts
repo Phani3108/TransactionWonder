@@ -66,10 +66,19 @@ export class XeroClientError extends Error {
   }
 }
 
+// Xero has a single set of production URLs; developers use the
+// "Demo Company" org on their own account for safe testing. P2-13 surfaces
+// this as an explicit config toggle so local dev runs can point at
+// a dedicated demo app's credentials without accidentally touching prod.
+const XERO_DEMO_MODE = process.env.XERO_DEMO_MODE === '1';
 const XERO_AUTH_URL = 'https://login.xero.com/identity/connect/authorize';
 const XERO_TOKEN_URL = 'https://identity.xero.com/connect/token';
 const XERO_CONNECTIONS_URL = 'https://api.xero.com/connections';
 const XERO_API_URL = 'https://api.xero.com/api.xro/2.0';
+if (XERO_DEMO_MODE) {
+  // Log once at module load so it's unmistakable which environment we're in.
+  console.info('[xero] XERO_DEMO_MODE=1 — expecting Xero Demo Company credentials');
+}
 
 export class XeroClient {
   private readonly config: XeroConfig;

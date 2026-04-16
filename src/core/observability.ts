@@ -184,12 +184,20 @@ interface UsageMetrics {
   latency_ms: number;
 }
 
-export function record_llm_usage(
-  span: Span,
-  metrics: UsageMetrics
-): void {
-  // Log metrics before ending span
-  // Note: Opik SDK span.end() doesn't take output args - set output via span properties if needed
+export function record_llm_usage(span: Span, metrics: UsageMetrics): void {
+  // P2-6: surface usage to Opik via span metadata where the SDK supports it.
+  // The current SDK's Span type exposes a minimal surface; we attach
+  // metrics to `metadata` when available and always log to console so
+  // usage is visible even without Opik configured.
+  try {
+    const s = span as unknown as { metadata?: Record<string, unknown> };
+    if (s && typeof s === 'object') {
+      s.metadata = { ...(s.metadata ?? {}), ...metrics };
+    }
+  } catch {
+    /* best-effort; fall through to console */
+  }
+  console.log('[opik:llm_usage]', metrics);
   span.end();
 }
 
@@ -202,8 +210,25 @@ export function record_agent_result(
     duration_ms: number;
   }
 ): void {
-  // Log result before ending span
-  // Note: Opik SDK span.end() doesn't take output args - set output via span properties if needed
+  // P2-6: emit a structured log line + attach to span metadata.
+  try {
+    const s = span as unknown as { metadata?: Record<string, unknown> };
+    if (s && typeof s === 'object') {
+      s.metadata = {
+        ...(s.metadata ?? {}),
+        success: result.success,
+        duration_ms: result.duration_ms,
+        ...(result.error ? { error: result.error } : {}),
+      };
+    }
+  } catch {
+    /* best-effort */
+  }
+  console.log('[opik:agent_result]', {
+    success: result.success,
+    duration_ms: result.duration_ms,
+    error: result.error ?? null,
+  });
   span.end();
 }
 

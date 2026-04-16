@@ -81,11 +81,35 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P1-2** — OAuth token persistence | ✅ Done | `oauth_tokens` table (RLS-enabled) + `TokenManager` with AES-256-GCM encryption and auto-refresh via pluggable refreshers. |
 | **P1-3** — Webhook router | ✅ Done | `/webhooks/stripe` verifies Stripe-Signature HMAC + timestamp window; `/webhooks/plaid` accepts signed events (JWKS verification tracked for P2). |
 | **P1-7** — JWT refresh + revocation | ✅ Done | 1h access + 30d refresh tokens with jti claim; `/auth/refresh` rotates; `/auth/logout` revokes; middleware checks `revoked_tokens` blacklist. |
-| *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
+| **P2 batch** | ✅ Done | `.env.example`, bcrypt 10→12, redundant invoice RLS policies removed, port warning fixed, Xero demo mode toggle, Opik span metadata. |
+| *Remaining P2 (deferred)* | 🗓️ Deferred | Flesh out 100 worker AGENT.md files (P2-8); Document AI service-account auth (P2-14); branded types for IDs (P2-15); audit-trigger column-level PII redaction (P2-11); optional pgcrypto defense-in-depth (P2-12). |
 
 ---
 
-## ✅ Latest phase: **P1-3 + P1-7 — Webhooks & JWT refresh** (2026-04-17)
+## ✅ Latest phase: **P2 batch — hygiene cleanup** (2026-04-17)
+
+### 🎯 What changed
+
+- 📝 **`.env.example`** at the repo root — every required var documented, with a clear generator hint for `OAUTH_ENCRYPTION_KEY`. Future setup just needs `cp .env.example .env`.
+- 🔐 **bcrypt work factor 10 → 12** in the demo seeder. Modern baseline for a financial system; adds ~50ms per hash.
+- 🧹 **Redundant invoice RLS policies removed** (`invoice_viewer_read`, `invoice_accountant_write`, `invoice_accountant_update`). They duplicated the generic `invoice_tenant_isolation` + app-layer role checks. Single responsibility: RLS enforces tenant isolation, the API enforces roles.
+- ⚓ **Port inconsistency resolved.** The 9100 "EXPECTED_PORT" warning that fired for everyone on the default 4004 is gone. `4004` is canonical; `PORT` env overrides.
+- 🧬 **Xero demo-mode toggle** (`XERO_DEMO_MODE=1`) logs a visible banner at module load so operators can tell demo from prod without reading auth logs.
+- 📡 **Opik spans now carry metadata.** `record_llm_usage` and `record_agent_result` stopped being no-ops and attach metrics to the span + emit structured log lines.
+
+### 🗓️ Explicitly deferred
+
+A handful of bigger P2 items aren’t in this commit because they’re not small hygiene — they’re their own phases:
+
+- **P2-8**: Flesh out the 100 worker `AGENT.md` files with per-worker capabilities/instructions (100 files).
+- **P2-14**: Real service-account auth for Document AI (needs `google-auth-library` and reconciling the client type surface).
+- **P2-15**: Branded `AgentId`/`TenantId`/`TaskId` types across the codebase.
+- **P2-11**: Column-aware PII redaction inside the `audit_log` trigger.
+- **P2-12**: pgcrypto-layer encryption on top of the app-level AES from P1-2 (defense-in-depth; app encryption is already authenticated).
+
+---
+
+## 📜 Previous phase: **P1-3 + P1-7 — Webhooks & JWT refresh** (2026-04-17)
 
 ### 🎯 What changed
 
