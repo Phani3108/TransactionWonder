@@ -26,6 +26,8 @@ export interface AgentConfig {
   description: string;
   capabilities: LedgerCapability[];
   server_url?: string;
+  /** Per-agent execution timeout in ms. Defaults to 30s in execute_task(). */
+  timeout_ms?: number;
 }
 
 export interface TaskResult {
@@ -152,8 +154,24 @@ export abstract class BaseAgent {
         throw new Error('Tenant isolation violation');
       }
 
-      // Execute the task
-      const output = await this.execute(task);
+      // Execute the task, bounded by a timeout so a hung LLM or stuck
+      // worker can't block a request indefinitely. Configurable per agent
+      // via AgentConfig.timeout_ms (falls back to 30s).
+      const timeout_ms = this.config.timeout_ms ?? 30_000;
+      const output = await Promise.race([
+        this.execute(task),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  `Task timeout: ${this.config.id} exceeded ${timeout_ms}ms on task ${task.id}`
+                )
+              ),
+            timeout_ms
+          ).unref?.()
+        ),
+      ]);
 
       const duration_ms = Date.now() - start_time;
       console.log(`[${this.config.name}] Task completed in ${duration_ms}ms`);

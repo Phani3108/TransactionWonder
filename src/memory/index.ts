@@ -2,8 +2,9 @@
 // description: Memory system barrel exports and convenience functions
 // reference: src/memory/types.ts, src/memory/store.ts
 
-import postgres from 'postgres';
+import postgres, { type Sql } from 'postgres';
 import { createMemoryStore, MemoryStore } from './store';
+import { withTenantContext, type TenantContext } from '../db/with-context';
 import type {
   MemoryEntry,
   MemoryType,
@@ -22,6 +23,39 @@ import type {
 
 export * from './types';
 export * from './store';
+
+// ============================================================================
+// Tenant-scoped store (preferred usage)
+// ============================================================================
+
+/**
+ * Preferred way to use the memory store: runs `fn` inside a transaction
+ * with the RLS session variables set LOCAL to that transaction, and gives
+ * the callback a `MemoryStore` bound to the transactional SQL client.
+ *
+ * This ensures the memories table's RLS policy (tenant_id =
+ * current_setting('app.current_tenant_id', true)::uuid) fires for every
+ * query — even when the pool connection gets reused across requests.
+ *
+ * Example:
+ *   await withMemoryStore(sql, { tenant_id, user_id, role }, async (store, tid) => {
+ *     await store.saveMemory(tid, { agentId, type: 'task', content: { ... } });
+ *   });
+ *
+ * Callers should prefer this helper over `getMemoryStore()` / the singleton
+ * pattern, which does NOT set tenant context and therefore relies on RLS
+ * being skipped (or a previously set GUC happening to be correct).
+ */
+export async function withMemoryStore<T>(
+  sql: Sql<Record<string, unknown>>,
+  ctx: TenantContext,
+  fn: (store: MemoryStore, tenantId: string) => Promise<T>
+): Promise<T> {
+  return withTenantContext(sql, ctx, async (tx) => {
+    const store = createMemoryStore(tx);
+    return fn(store, ctx.tenant_id);
+  });
+}
 
 // ============================================================================
 // Singleton Store Instance

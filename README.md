@@ -67,14 +67,27 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P0-3** — CEO → orchestrator real delegation | ✅ Done | `delegate_to()` now actually calls the orchestrator via `agent_runtime` and propagates errors. |
 | **P0-4** — AP Lead → worker dispatch | ✅ Done | AP Lead routes each capability to the matching worker via `agent_runtime`. Reference impl for the other 8 orchestrators. |
 | **P0-5** — Skill executor MVP | ✅ Done | `src/skills/` with registry, executor, Zod-validated input/output, PII redaction hook, plus `invoice-processor` and `payment-gateway` handlers. |
-| P0-6 — Task timeout | ⏳ Next | `Promise.race` wrapper so hung LLM calls don’t block forever. |
-| P0-7 — Memory store tenant context | ⏳ Next | Memory queries go through the same wrapper. |
+| **P0-6** — Task timeout | ✅ Done | `Promise.race` wraps every `execute()` with a per-agent timeout (default 30s) so hung LLMs don’t block requests. |
+| **P0-7** — Memory store tenant context | ✅ Done | New `withMemoryStore()` helper runs memory operations inside `withTenantContext` so RLS GUCs fire. |
 | *P1 items* | 🗓️ Planned | Shared HTTP wrapper (retry + circuit breaker), OAuth token persistence, webhooks, Stripe idempotency, JWT refresh, audit log persistence, parallel DAG, PII redaction. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P0-5 — Skill executor MVP** (2026-04-17)
+## ✅ Latest phase: **P0-6 + P0-7 — Task timeout & tenant-scoped memory** (2026-04-17)
+
+### 🎯 What changed
+
+- ⏱️ **Per-agent task timeout** in `src/agents/base.ts` — `execute_task()` now wraps `this.execute(task)` in a `Promise.race` against a timeout (default 30s, configurable via `AgentConfig.timeout_ms`). A hung LLM call or stuck worker now fails closed with a clear error instead of blocking the request.
+- 🧠 **`withMemoryStore()` helper** in `src/memory/index.ts` — runs memory operations inside `withTenantContext`, so the memories-table RLS policy (`tenant_id = current_setting('app.current_tenant_id', true)`) fires on every query. This is the preferred entry point for callers; the legacy singleton pattern is documented as "don’t use this for real requests".
+
+### ⚠️ Known caveats
+
+- MemoryStore still has some `.unsafe` string interpolation on dynamic filter fields. Mitigated today because `tenantId` comes from a signed JWT and RLS enforces isolation at the DB, but it’s flagged for the P2 hygiene sweep.
+
+---
+
+## 📜 Previous phase: **P0-5 — Skill executor MVP** (2026-04-17)
 
 ### 🎯 What changed
 
