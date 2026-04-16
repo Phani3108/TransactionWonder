@@ -1,18 +1,21 @@
 // file: src/agents/orchestrators/reporting_lead.ts
-// description: Reporting Lead orchestrator - manages financial reports
-// reference: src/agents/base.ts, agents/orchestrators/reporting-lead/AGENT.md
+// description: Reporting Lead — dispatches to P&L / balance-sheet / analysis workers.
+// reference: src/agents/orchestrators/_dispatch.ts
 
 import { BaseAgent, type AgentConfig } from '../base';
-import type { LedgerTaskStar } from '../../core/types';
+import type { LedgerTaskStar, LedgerCapability } from '../../core/types';
+import { dispatchCapability } from './_dispatch';
 
 const REPORTING_LEAD_CONFIG: AgentConfig = {
   id: 'reporting_lead',
   name: 'Reporting Lead',
   description: 'Financial reports orchestrator managing P&L, balance sheet, and custom reports',
-  capabilities: [
-    'report_generation',
-    'report_analysis',
-  ],
+  capabilities: ['report_generation', 'report_analysis'],
+};
+
+const CAPABILITY_TO_WORKER: Partial<Record<LedgerCapability, string>> = {
+  report_generation: 'reporting_pl_generator',
+  report_analysis: 'reporting_comparative_analyzer',
 };
 
 export class ReportingLeadAgent extends BaseAgent {
@@ -21,43 +24,13 @@ export class ReportingLeadAgent extends BaseAgent {
   }
 
   protected async execute(task: LedgerTaskStar): Promise<Record<string, unknown>> {
-    const { name, input, required_capabilities } = task;
-    const tenant = this.ensure_tenant_context();
-
-    console.log(`[Reporting Lead] Processing: ${name}`);
-
-    if (required_capabilities.includes('report_generation')) {
-      return await this.generate_report(input);
-    }
-
-    if (required_capabilities.includes('report_analysis')) {
-      return await this.analyze_report(input);
-    }
-
-    throw new Error(`No handler for capabilities: ${required_capabilities.join(', ')}`);
-  }
-
-  private async generate_report(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Reporting Lead] Generating report');
-    
-    const report_type = String(input.report_type || 'profit_loss');
-    
-    return {
-      success: true,
-      report_type,
-      report_id: crypto.randomUUID(),
-      message: 'Report generated successfully',
-      data: {},
-    };
-  }
-
-  private async analyze_report(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Reporting Lead] Analyzing report');
-    
-    return {
-      success: true,
-      insights: [],
-      message: 'Report analysis completed',
-    };
+    this.ensure_tenant_context();
+    return dispatchCapability(
+      this,
+      task,
+      CAPABILITY_TO_WORKER,
+      'You are the Reporting Lead. Produce accurate financial reports and call out meaningful trends.',
+      'Reporting Lead'
+    );
   }
 }

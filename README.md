@@ -75,12 +75,32 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P1-9** — Parallel DAG | ✅ Done | `execute_plan` processes tasks level-by-level, with `Promise.all` inside each level. New `topological_levels()` helper. |
 | **P1-10** — Orchestration retry | ✅ Done | Each task wrapped in `retryWithBackoff` with exponential backoff, full jitter, and classifier that skips domain-validation errors. |
 | **P1-11** — PII redaction on LLM path | ✅ Done | `llm.complete()` redacts PII by default (`redact_pii: true`). Opt-out for callers that pre-redact. |
-| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, remaining orchestrators + skills. |
+| **P1-5** — Remaining orchestrators dispatch | ✅ Done | CFO, AR Lead, Reconciliation, Compliance, Reporting, Integration, Data/ETL, Support all route via shared `_dispatch.ts` helper. |
+| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, remaining 6 skills. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P1-8 + P1-9 + P1-10 + P1-11 — Audit persistence, parallel DAG, retry, PII redaction** (2026-04-17)
+## ✅ Latest phase: **P1-5 — Remaining 8 orchestrators wire to workers** (2026-04-17)
+
+### 🎯 What changed
+
+- 🔌 **8 orchestrators now dispatch to workers**: CFO, AR Lead, Reconciliation, Compliance, Reporting, Integration, Data/ETL, Support. Previously all of these were stubs returning `{ matched_count: 0, success: true, ... }`.
+- 🧰 **Shared helper** `src/agents/orchestrators/_dispatch.ts` — all 9 orchestrators now route through a single `dispatchCapability()` function:
+  1. Look through `required_capabilities`.
+  2. Find the first one in that orchestrator’s capability→worker table.
+  3. Delegate through `agent_runtime.get_agent(worker_id).execute_task(...)`.
+  4. Fall back to a local LLM call with the orchestrator’s role as the system prompt if nothing matches.
+- 🎛️ **Uniform behavior.** Every orchestrator file is now ~35 lines: config + capability table + a thin `execute()` that calls the helper. No more divergent in-line LLM calls.
+
+### 🧭 What this unblocks
+
+- The 100 workers are now reachable through the hierarchy for the first time.
+- Worker bodies are still `WorkerAgent` stubs (they return templated success) — wiring them to real skills is P1-6 and beyond.
+
+---
+
+## 📜 Previous phase: **P1-8 + P1-9 + P1-10 + P1-11 — Audit persistence, parallel DAG, retry, PII redaction** (2026-04-17)
 
 ### 🎯 What changed
 

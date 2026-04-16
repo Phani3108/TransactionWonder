@@ -1,19 +1,22 @@
 // file: src/agents/orchestrators/data_etl_lead.ts
-// description: Data/ETL Lead orchestrator - manages data import and transformation
-// reference: src/agents/base.ts, agents/orchestrators/data-etl-lead/AGENT.md
+// description: Data/ETL Lead — dispatches to importer / transformer / validator workers.
+// reference: src/agents/orchestrators/_dispatch.ts
 
 import { BaseAgent, type AgentConfig } from '../base';
-import type { LedgerTaskStar } from '../../core/types';
+import type { LedgerTaskStar, LedgerCapability } from '../../core/types';
+import { dispatchCapability } from './_dispatch';
 
 const DATA_ETL_LEAD_CONFIG: AgentConfig = {
   id: 'data_etl_lead',
   name: 'Data/ETL Lead',
   description: 'Data processing orchestrator managing import, transformation, and validation',
-  capabilities: [
-    'data_import',
-    'data_transformation',
-    'data_validation',
-  ],
+  capabilities: ['data_import', 'data_transformation', 'data_validation'],
+};
+
+const CAPABILITY_TO_WORKER: Partial<Record<LedgerCapability, string>> = {
+  data_import: 'data_csv_importer',
+  data_transformation: 'data_data_transformer',
+  data_validation: 'data_data_validator',
 };
 
 export class DataETLLeadAgent extends BaseAgent {
@@ -22,58 +25,13 @@ export class DataETLLeadAgent extends BaseAgent {
   }
 
   protected async execute(task: LedgerTaskStar): Promise<Record<string, unknown>> {
-    const { name, input, required_capabilities } = task;
-    const tenant = this.ensure_tenant_context();
-
-    console.log(`[Data/ETL Lead] Processing: ${name}`);
-
-    if (required_capabilities.includes('data_import')) {
-      return await this.import_data(input);
-    }
-
-    if (required_capabilities.includes('data_transformation')) {
-      return await this.transform_data(input);
-    }
-
-    if (required_capabilities.includes('data_validation')) {
-      return await this.validate_data(input);
-    }
-
-    throw new Error(`No handler for capabilities: ${required_capabilities.join(', ')}`);
-  }
-
-  private async import_data(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Data/ETL Lead] Importing data');
-    
-    const source = String(input.source || 'csv');
-    
-    return {
-      success: true,
-      source,
-      records_imported: 0,
-      message: 'Data imported successfully',
-    };
-  }
-
-  private async transform_data(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Data/ETL Lead] Transforming data');
-    
-    return {
-      success: true,
-      records_transformed: 0,
-      message: 'Data transformed successfully',
-    };
-  }
-
-  private async validate_data(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Data/ETL Lead] Validating data');
-    
-    return {
-      success: true,
-      valid_records: 0,
-      invalid_records: 0,
-      errors: [],
-      message: 'Data validation completed',
-    };
+    this.ensure_tenant_context();
+    return dispatchCapability(
+      this,
+      task,
+      CAPABILITY_TO_WORKER,
+      'You are the Data/ETL Lead. Ensure imports are clean, transformations lossless, and validations catch real problems.',
+      'Data/ETL Lead'
+    );
   }
 }

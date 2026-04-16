@@ -1,19 +1,22 @@
 // file: src/agents/orchestrators/compliance_lead.ts
-// description: Compliance Lead orchestrator - manages regulatory compliance
-// reference: src/agents/base.ts, agents/orchestrators/compliance-lead/AGENT.md
+// description: Compliance Lead — dispatches to tax / audit / policy workers.
+// reference: src/agents/orchestrators/_dispatch.ts
 
 import { BaseAgent, type AgentConfig } from '../base';
-import type { LedgerTaskStar } from '../../core/types';
+import type { LedgerTaskStar, LedgerCapability } from '../../core/types';
+import { dispatchCapability } from './_dispatch';
 
 const COMPLIANCE_LEAD_CONFIG: AgentConfig = {
   id: 'compliance_lead',
   name: 'Compliance Lead',
   description: 'Regulatory compliance orchestrator managing tax and audit',
-  capabilities: [
-    'tax_compliance_check',
-    'audit_preparation',
-    'policy_enforcement',
-  ],
+  capabilities: ['tax_compliance_check', 'audit_preparation', 'policy_enforcement'],
+};
+
+const CAPABILITY_TO_WORKER: Partial<Record<LedgerCapability, string>> = {
+  tax_compliance_check: 'compliance_tax_compliance_checker',
+  audit_preparation: 'compliance_audit_preparer',
+  policy_enforcement: 'compliance_policy_enforcer',
 };
 
 export class ComplianceLeadAgent extends BaseAgent {
@@ -22,57 +25,13 @@ export class ComplianceLeadAgent extends BaseAgent {
   }
 
   protected async execute(task: LedgerTaskStar): Promise<Record<string, unknown>> {
-    const { name, input, required_capabilities } = task;
-    const tenant = this.ensure_tenant_context();
-
-    console.log(`[Compliance Lead] Processing: ${name}`);
-
-    if (required_capabilities.includes('tax_compliance_check')) {
-      return await this.check_tax_compliance(input);
-    }
-
-    if (required_capabilities.includes('audit_preparation')) {
-      return await this.prepare_audit_documents(input);
-    }
-
-    if (required_capabilities.includes('policy_enforcement')) {
-      return await this.enforce_policy(input);
-    }
-
-    throw new Error(`No handler for capabilities: ${required_capabilities.join(', ')}`);
-  }
-
-  private async check_tax_compliance(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Compliance Lead] Checking tax compliance');
-    
-    return {
-      success: true,
-      compliant: true,
-      issues: [],
-      message: 'Tax compliance check completed',
-    };
-  }
-
-  private async prepare_audit_documents(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Compliance Lead] Preparing audit documents');
-    
-    return {
-      success: true,
-      documents_prepared: 0,
-      message: 'Audit documents prepared',
-    };
-  }
-
-  private async enforce_policy(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Compliance Lead] Enforcing policy');
-    
-    const policy_id = String(input.policy_id || '');
-    
-    return {
-      success: true,
-      policy_id,
-      violations: [],
-      message: 'Policy enforcement completed',
-    };
+    this.ensure_tenant_context();
+    return dispatchCapability(
+      this,
+      task,
+      CAPABILITY_TO_WORKER,
+      'You are the Compliance Lead. Apply tax rules and audit trails rigorously; flag anything that looks off.',
+      'Compliance Lead'
+    );
   }
 }

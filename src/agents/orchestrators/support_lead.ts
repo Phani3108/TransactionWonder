@@ -1,19 +1,22 @@
 // file: src/agents/orchestrators/support_lead.ts
-// description: Support Lead orchestrator - manages user assistance and error recovery
-// reference: src/agents/base.ts, agents/orchestrators/support-lead/AGENT.md
+// description: Support Lead — dispatches to help-desk / diagnostics / escalation workers.
+// reference: src/agents/orchestrators/_dispatch.ts
 
 import { BaseAgent, type AgentConfig } from '../base';
-import type { LedgerTaskStar } from '../../core/types';
+import type { LedgerTaskStar, LedgerCapability } from '../../core/types';
+import { dispatchCapability } from './_dispatch';
 
 const SUPPORT_LEAD_CONFIG: AgentConfig = {
   id: 'support_lead',
   name: 'Support Lead',
   description: 'User assistance orchestrator managing help desk and error recovery',
-  capabilities: [
-    'user_assistance',
-    'error_recovery',
-    'escalation_handling',
-  ],
+  capabilities: ['user_assistance', 'error_recovery', 'escalation_handling'],
+};
+
+const CAPABILITY_TO_WORKER: Partial<Record<LedgerCapability, string>> = {
+  user_assistance: 'support_help_desk_agent',
+  error_recovery: 'support_error_diagnostician',
+  escalation_handling: 'support_escalation_manager',
 };
 
 export class SupportLeadAgent extends BaseAgent {
@@ -22,62 +25,13 @@ export class SupportLeadAgent extends BaseAgent {
   }
 
   protected async execute(task: LedgerTaskStar): Promise<Record<string, unknown>> {
-    const { name, input, required_capabilities } = task;
-    const tenant = this.ensure_tenant_context();
-
-    console.log(`[Support Lead] Processing: ${name}`);
-
-    if (required_capabilities.includes('user_assistance')) {
-      return await this.assist_user(input);
-    }
-
-    if (required_capabilities.includes('error_recovery')) {
-      return await this.recover_from_error(input);
-    }
-
-    if (required_capabilities.includes('escalation_handling')) {
-      return await this.handle_escalation(input);
-    }
-
-    throw new Error(`No handler for capabilities: ${required_capabilities.join(', ')}`);
-  }
-
-  private async assist_user(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Support Lead] Assisting user');
-    
-    const query = String(input.query || '');
-    
-    return {
-      success: true,
-      query,
-      response: 'User assistance provided',
-      ticket_id: crypto.randomUUID(),
-    };
-  }
-
-  private async recover_from_error(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Support Lead] Recovering from error');
-    
-    const error_id = String(input.error_id || '');
-    
-    return {
-      success: true,
-      error_id,
-      recovered: true,
-      message: 'Error recovery completed',
-    };
-  }
-
-  private async handle_escalation(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    console.log('[Support Lead] Handling escalation');
-    
-    const ticket_id = String(input.ticket_id || '');
-    
-    return {
-      success: true,
-      ticket_id,
-      escalated_to: 'senior_support',
-      message: 'Escalation handled',
-    };
+    this.ensure_tenant_context();
+    return dispatchCapability(
+      this,
+      task,
+      CAPABILITY_TO_WORKER,
+      'You are the Support Lead. Resolve user issues clearly; escalate with context rather than ping-ponging.',
+      'Support Lead'
+    );
   }
 }
