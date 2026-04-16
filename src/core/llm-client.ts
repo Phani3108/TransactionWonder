@@ -42,6 +42,28 @@ interface InvoiceParseResult {
 // Core LLM Functions
 // ============================================================================
 
+// Import shared retry helper. Circuit breaker is wrapped inside.
+import { retryWithBackoff } from '../integrations/http';
+import { llm_circuit_breaker } from '../guardrails/circuit-breaker';
+
+// Internal: retry + circuit-breaker gate for the LLM provider.
+async function httpRequestRetry<T>(opts: {
+  service: 'llm';
+  attempt: () => Promise<T>;
+  retryable?: (err: unknown) => boolean;
+}): Promise<T> {
+  return llm_circuit_breaker.execute(() =>
+    retryWithBackoff({
+      attempt: opts.attempt,
+      maxRetries: 3,
+      baseDelayMs: 500,
+      maxDelayMs: 8_000,
+      jitter: true,
+      retryable: opts.retryable,
+    })
+  );
+}
+
 export async function complete(
   prompt: string,
   options: CompletionOptions = {}
@@ -65,36 +87,45 @@ export async function complete(
   });
 
   try {
-    const completion = await deepseek.chat.completions.create({
-      model,
-      max_tokens,
-      temperature,
-      messages: [
-        {
-          role: 'system',
-          content: system,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    const completion = await httpRequestRetry({
+      service: 'llm',
+      attempt: () =>
+        deepseek.chat.completions.create({
+          model,
+          max_tokens,
+          temperature,
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: prompt },
+          ],
+        }),
+      // Only retry on likely-transient errors. 4xx from the model provider
+      // (bad auth, bad request) should surface immediately, not hammer.
+      retryable: (err) => {
+        const e = err as { status?: number; code?: string; name?: string };
+        if (typeof e?.status === 'number') {
+          // 408 timeout, 425 early, 429 rate limit, 5xx server
+          return e.status === 408 || e.status === 425 || e.status === 429 || e.status >= 500;
+        }
+        // Network-ish errors from fetch
+        return e?.name === 'TypeError' || e?.code === 'ETIMEDOUT' || e?.code === 'ECONNRESET';
+      },
     });
 
     const response_text = completion.choices[0]?.message?.content || '';
     const latency_ms = Date.now() - start_time;
+    void latency_ms;
 
-    // Log usage metrics to Opik
-    if (trace) {
-      trace.end();
-    }
+    // Opik: end the trace exactly once on the success path.
+    if (trace) trace.end();
 
     return response_text;
   } catch (error) {
-    // Log error to Opik
-    if (trace) {
-      trace.end();
-    }
+    // Opik: end the trace exactly once on the error path. The old code
+    // could call trace.end() twice if the inner block threw after
+    // already ending; structuring the try so .end() lives only in the
+    // success and catch branches (not both) removes that double-end.
+    if (trace) trace.end();
     throw error;
   }
 }
@@ -293,27 +324,49 @@ IMPORTANT: Return only the JSON array, no markdown, no explanation, no code bloc
   // Find JSON array
   const json_match = json_text.match(/\[[\s\S]*\]/);
   if (!json_match) {
-    console.error('[LLM] Failed to find JSON in response:', response);
-    // Return a simple fallback task
-    return [{
-      name: "Execute Request",
-      description: request,
-      required_capabilities: ["report_generation"],
-      dependencies: []
-    }];
+    // P1-12: fail loudly. The old code silently collapsed any request to
+    // a single "generate a report" task, which caused wildly wrong
+    // behavior (e.g. "process invoice and reconcile" → report generation).
+    // Surface the error so the caller can react (retry, ask the user, etc.).
+    console.error('[LLM] Failed to find JSON in decomposition response:', response);
+    throw new TaskDecompositionError(
+      'LLM did not return a JSON array for task decomposition',
+      { request, raw_response: response }
+    );
   }
 
   try {
-    return JSON.parse(json_match[0]);
+    const parsed = JSON.parse(json_match[0]);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new TaskDecompositionError(
+        'LLM returned empty or non-array decomposition',
+        { request, raw_response: response, parsed }
+      );
+    }
+    return parsed;
   } catch (error) {
-    console.error('[LLM] Failed to parse JSON:', json_match[0]);
-    // Return fallback
-    return [{
-      name: "Execute Request",
-      description: request,
-      required_capabilities: ["report_generation"],
-      dependencies: []
-    }];
+    if (error instanceof TaskDecompositionError) throw error;
+    console.error('[LLM] Failed to parse decomposition JSON:', json_match[0]);
+    throw new TaskDecompositionError(
+      'LLM decomposition output was not valid JSON',
+      { request, raw_response: response, parse_error: String(error) }
+    );
+  }
+}
+
+/**
+ * Thrown when the LLM fails to produce a usable task decomposition.
+ * Callers should catch this and decide on a recovery: retry once with
+ * a tightened prompt, surface to the user for clarification, or default
+ * to a safe single-task flow (but only if that's explicitly desired —
+ * the old silent fallback caused invisible misroutes).
+ */
+export class TaskDecompositionError extends Error {
+  readonly context: Record<string, unknown>;
+  constructor(message: string, context: Record<string, unknown>) {
+    super(message);
+    this.name = 'TaskDecompositionError';
+    this.context = context;
   }
 }
 

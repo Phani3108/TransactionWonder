@@ -69,12 +69,34 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P0-5** — Skill executor MVP | ✅ Done | `src/skills/` with registry, executor, Zod-validated input/output, PII redaction hook, plus `invoice-processor` and `payment-gateway` handlers. |
 | **P0-6** — Task timeout | ✅ Done | `Promise.race` wraps every `execute()` with a per-agent timeout (default 30s) so hung LLMs don’t block requests. |
 | **P0-7** — Memory store tenant context | ✅ Done | New `withMemoryStore()` helper runs memory operations inside `withTenantContext` so RLS GUCs fire. |
-| *P1 items* | 🗓️ Planned | Shared HTTP wrapper (retry + circuit breaker), OAuth token persistence, webhooks, Stripe idempotency, JWT refresh, audit log persistence, parallel DAG, PII redaction. |
+| **P1-1** — Shared HTTP wrapper | ✅ Done | `src/integrations/http.ts` with retry + CB + rate-limit awareness. LLM client now uses it. |
+| **P1-12** — Fail-loud decomposition | ✅ Done | LLM task decomposition throws `TaskDecompositionError` instead of silently collapsing to "generate report". |
+| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, audit log persistence, parallel DAG, PII redaction on LLM path, remaining orchestrators + skills. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P0-6 + P0-7 — Task timeout & tenant-scoped memory** (2026-04-17)
+## ✅ Latest phase: **P1-1 + P1-12 — Shared HTTP wrapper & fail-loud LLM decomposition** (2026-04-17)
+
+### 🎯 What changed
+
+- 🆕 **`src/integrations/http.ts`** — one place for all integration HTTP calls.
+  - 🚧 **Circuit breaker** per service (Plaid, Stripe, QuickBooks, Xero, Document AI, LLM).
+  - 🔁 **Exponential backoff** retry (full jitter, configurable `maxRetries`, `baseDelayMs`, `maxDelayMs`).
+  - 🕰️ **Retry-After header** honored for 429 responses.
+  - 🧰 Exposes a generic `retryWithBackoff()` for non-HTTP paths (LLM SDK calls, etc.).
+- 🧠 **LLM client hardened.** `llm.complete()` now goes through the circuit breaker + retry wrapper and classifies errors (`408/425/429/5xx` retry; `4xx` surface immediately). The long-standing double `trace.end()` bug is fixed as a side-effect.
+- 📣 **P1-12: LLM decomposition fails loudly.** `decompose_financial_task()` now throws `TaskDecompositionError` (with context) on parse failure instead of silently collapsing every request to a single "generate report" task. Callers can catch and decide on recovery.
+- 🧪 **Tests** at `tests/integrations/http.test.ts` cover retry-on-429, Retry-After numeric parsing, retry on transient errors, non-retry on 4xx, exhaustion, and `isRetryable` opt-out.
+
+### 🧭 Where this plugs in
+
+- P1-10 (orchestration retry) reuses `retryWithBackoff`.
+- Each of Plaid/Stripe/QB/Xero/Document AI can opt in by wrapping its `request()` — the same tests cover that path.
+
+---
+
+## 📜 Previous phase: **P0-6 + P0-7 — Task timeout & tenant-scoped memory** (2026-04-17)
 
 ### 🎯 What changed
 

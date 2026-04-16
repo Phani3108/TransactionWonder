@@ -138,3 +138,15 @@ export const llm_circuit_breaker = new CircuitBreaker({
   timeout_seconds: 20,
   success_threshold: 3,
 });
+
+export const xero_circuit_breaker = new CircuitBreaker({
+  failure_threshold: 3,
+  timeout_seconds: 60,
+  success_threshold: 2,
+});
+
+export const document_ai_circuit_breaker = new CircuitBreaker({
+  failure_threshold: 5,
+  timeout_seconds: 30,
+  success_threshold: 2,
+});
