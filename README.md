@@ -66,7 +66,7 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P0-2** — RLS isolation test suite | ✅ Done | 7 integration tests prove tenant A can’t read B, viewer can’t write, WITH CHECK blocks cross-tenant INSERTs, super_admin can. |
 | **P0-3** — CEO → orchestrator real delegation | ✅ Done | `delegate_to()` now actually calls the orchestrator via `agent_runtime` and propagates errors. |
 | **P0-4** — AP Lead → worker dispatch | ✅ Done | AP Lead routes each capability to the matching worker via `agent_runtime`. Reference impl for the other 8 orchestrators. |
-| P0-5 — Skill executor MVP | ⏳ Next | `invokeSkill()` + Zod schemas for `invoice-processor` + `payment-gateway`. |
+| **P0-5** — Skill executor MVP | ✅ Done | `src/skills/` with registry, executor, Zod-validated input/output, PII redaction hook, plus `invoice-processor` and `payment-gateway` handlers. |
 | P0-6 — Task timeout | ⏳ Next | `Promise.race` wrapper so hung LLM calls don’t block forever. |
 | P0-7 — Memory store tenant context | ⏳ Next | Memory queries go through the same wrapper. |
 | *P1 items* | 🗓️ Planned | Shared HTTP wrapper (retry + circuit breaker), OAuth token persistence, webhooks, Stripe idempotency, JWT refresh, audit log persistence, parallel DAG, PII redaction. |
@@ -74,7 +74,34 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 
 ---
 
-## ✅ Latest phase: **P0-3 + P0-4 — Real CEO delegation & AP Lead → worker dispatch** (2026-04-17)
+## ✅ Latest phase: **P0-5 — Skill executor MVP** (2026-04-17)
+
+### 🎯 What changed
+
+- 🆕 **`src/skills/` layer** — the first real entry point for skills, not just markdown docs:
+  - `types.ts` — `SkillContext`, `SkillDefinition<In, Out>`, and typed error classes (`SkillNotFoundError`, `SkillInputError`, `SkillOutputError`).
+  - `registry.ts` — in-memory registry of skills.
+  - `executor.ts` — single `invokeSkill(name, input, ctx)` entry point. Validates input via Zod, runs the optional PII redaction hook, calls the handler, validates the output.
+  - `index.ts` — auto-registers built-in skills on import.
+- 🧾 **Handler: `invoice-processor`** — takes an OCR blob, redacts PII (SSN/CC/email), calls `llm.parse_invoice()`, returns typed invoice fields.
+- 💳 **Handler: `payment-gateway`** — creates a Stripe PaymentIntent with a **deterministic idempotency key** (hash of `tenant_id | invoice_id | amount`). Retries with the same key never double-charge. Falls back to a synthetic response when `STRIPE_SECRET_KEY` is unset, so local dev and CI don't need real Stripe creds.
+- 🧪 **Tests added** at `tests/skills/executor.test.ts`:
+  - Valid input → validated output
+  - PII hook runs before handler
+  - Unknown skill → `SkillNotFoundError`
+  - Bad input → `SkillInputError`
+  - Bad output from handler → `SkillOutputError`
+  - Built-in skills are registered
+  - Synthetic Stripe mode + idempotency key stability
+
+### 🧭 How this plugs into the hierarchy
+
+- Workers will call `invokeSkill()` rather than reimplement the logic locally.
+- The capability-to-worker table in AP Lead (P0-4) points to worker agents; P1-5 wires each worker to its skill.
+
+---
+
+## 📜 Previous phase: **P0-3 + P0-4 — Real CEO delegation & AP Lead → worker dispatch** (2026-04-17)
 
 ### 🎯 What changed
 
