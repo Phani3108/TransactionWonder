@@ -3,6 +3,7 @@
 // reference: src/core/types.ts, src/core/observability.ts
 
 import { v4 as uuid } from 'uuid';
+import postgres, { type Sql } from 'postgres';
 import type {
   AgentProfile,
   LedgerAgentId,
@@ -19,6 +20,19 @@ import {
   start_agent_span,
   record_agent_result,
 } from '../core/observability';
+import { withTenantContext } from '../db/with-context';
+
+// Lazy module-scoped pool for persisting agent_runs rows. One pool per
+// process, shared across all agents. Connection is acquired only when an
+// audit write actually happens, so tests and offline runs don't open a
+// connection they never need.
+let _audit_sql: Sql<Record<string, unknown>> | null = null;
+function get_audit_sql(): Sql<Record<string, unknown>> | null {
+  if (_audit_sql) return _audit_sql;
+  if (!process.env.DATABASE_URL) return null;
+  _audit_sql = postgres(process.env.DATABASE_URL, { max: 2, idle_timeout: 20 });
+  return _audit_sql;
+}
 
 export interface AgentConfig {
   id: LedgerAgentId;
@@ -245,11 +259,11 @@ export abstract class BaseAgent {
     entity_id: string;
     details: Record<string, unknown>;
   }): Promise<void> {
-    // Audit logging will be implemented via database client
-    // For now, log to console
     const tenant = this.current_tenant;
     if (!tenant) return;
 
+    // Always emit a structured log line so dev runs see audit events even
+    // without a configured DATABASE_URL.
     console.log('[AUDIT]', {
       tenant_id: tenant.tenant_id,
       user_id: tenant.user_id,
@@ -257,6 +271,62 @@ export abstract class BaseAgent {
       ...entry,
       timestamp: new Date().toISOString(),
     });
+
+    // Persist to agent_runs for task-level events. entity_type==='agent_runs'
+    // is the convention used by execute_task() above. Other entity types
+    // (invoices, transactions, ...) can extend this when needed; for now we
+    // only persist the agent-run lifecycle.
+    if (entry.entity_type !== 'agent_runs') return;
+
+    const sql = get_audit_sql();
+    if (!sql) return; // no DATABASE_URL → skip DB write, rely on console
+
+    try {
+      const status =
+        entry.action === 'task_completed'
+          ? 'completed'
+          : entry.action === 'task_failed'
+          ? 'failed'
+          : 'running';
+
+      const duration_ms =
+        typeof (entry.details as { duration_ms?: number }).duration_ms === 'number'
+          ? (entry.details as { duration_ms: number }).duration_ms
+          : null;
+      const error =
+        typeof (entry.details as { error?: string }).error === 'string'
+          ? (entry.details as { error: string }).error
+          : null;
+
+      await withTenantContext(
+        sql,
+        {
+          tenant_id: String(tenant.tenant_id),
+          user_id: String(tenant.user_id),
+          role: tenant.user_role,
+        },
+        async (tx) => {
+          await tx`
+            INSERT INTO agent_runs (
+              tenant_id, agent_id, task_id, status,
+              started_at, completed_at, duration_ms, error
+            ) VALUES (
+              ${String(tenant.tenant_id)},
+              ${this.config.id},
+              ${entry.entity_id},
+              ${status},
+              ${new Date().toISOString()},
+              ${status === 'running' ? null : new Date().toISOString()},
+              ${duration_ms},
+              ${error}
+            )
+          `;
+        }
+      );
+    } catch (err) {
+      // Audit failures should never take down the main request.
+      console.warn('[AUDIT] Persist failed:', err);
+    }
   }
 
   // ===========================================================================

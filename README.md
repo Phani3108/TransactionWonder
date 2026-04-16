@@ -71,12 +71,28 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P0-7** — Memory store tenant context | ✅ Done | New `withMemoryStore()` helper runs memory operations inside `withTenantContext` so RLS GUCs fire. |
 | **P1-1** — Shared HTTP wrapper | ✅ Done | `src/integrations/http.ts` with retry + CB + rate-limit awareness. LLM client now uses it. |
 | **P1-12** — Fail-loud decomposition | ✅ Done | LLM task decomposition throws `TaskDecompositionError` instead of silently collapsing to "generate report". |
-| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, audit log persistence, parallel DAG, PII redaction on LLM path, remaining orchestrators + skills. |
+| **P1-8** — Audit log persistence | ✅ Done | `log_audit()` now INSERTs into `agent_runs` via `withTenantContext` instead of `console.log`. |
+| **P1-9** — Parallel DAG | ✅ Done | `execute_plan` processes tasks level-by-level, with `Promise.all` inside each level. New `topological_levels()` helper. |
+| **P1-10** — Orchestration retry | ✅ Done | Each task wrapped in `retryWithBackoff` with exponential backoff, full jitter, and classifier that skips domain-validation errors. |
+| **P1-11** — PII redaction on LLM path | ✅ Done | `llm.complete()` redacts PII by default (`redact_pii: true`). Opt-out for callers that pre-redact. |
+| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, remaining orchestrators + skills. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P1-1 + P1-12 — Shared HTTP wrapper & fail-loud LLM decomposition** (2026-04-17)
+## ✅ Latest phase: **P1-8 + P1-9 + P1-10 + P1-11 — Audit persistence, parallel DAG, retry, PII redaction** (2026-04-17)
+
+### 🎯 What changed
+
+- 🧾 **P1-8: Audit log persistence.** `base.ts` `log_audit()` now INSERTs into `agent_runs` through `withTenantContext()` — the transaction-scoped pool we built in P0-1. Previously only `console.log`. Audit failures are caught and never take down the request.
+- 🚀 **P1-9: Parallel DAG execution.** New `topological_levels()` helper groups tasks into levels where everything in level `N` has its dependencies in levels `<N`. `execute_plan` now runs each level with `Promise.all`. The old sequential `for (task of order)` is gone; independent tasks fan out.
+- 🔁 **P1-10: Real retry in orchestration.** Every task execution is wrapped in `retryWithBackoff` (from P1-1): exponential backoff with full jitter, up to 3 attempts. The `retryable` classifier skips domain-validation errors (`"invalid"`, `"validation"`, `"isolation"`) so bad inputs don’t get hammered.
+- 🛡️ **P1-11: PII redaction by default on `llm.complete()`.** SSN, credit card, phone, email are scrubbed before the prompt reaches the LLM. Opt-out via `redact_pii: false` only when the caller has already run its own redaction (e.g. the skill layer’s `redactPII` hook).
+- 🧹 **Type errors cleaned up.** `src/agents/orchestration_service.ts` had two pre-existing TS errors (missing `TenantContext` export, `string \| null` vs `string \| undefined`). Both fixed as a side effect of this work.
+
+---
+
+## 📜 Previous phase: **P1-1 + P1-12 — Shared HTTP wrapper & fail-loud LLM decomposition** (2026-04-17)
 
 ### 🎯 What changed
 

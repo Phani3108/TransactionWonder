@@ -5,7 +5,9 @@
 import { v4 as uuid } from 'uuid';
 import { agent_runtime } from './index';
 import * as llm from '../core/llm-client';
-import type { LedgerTaskStar, LedgerCapability, LedgerAgentId, TenantContext } from '../core/types';
+import type { LedgerTaskStar, LedgerCapability, LedgerAgentId } from '../core/types';
+import type { TenantContext } from './base';
+import { retryWithBackoff } from '../integrations/http';
 
 // ============================================================================
 // Types
@@ -180,139 +182,23 @@ class OrchestrationService {
     let tasks_failed = 0;
 
     try {
-      // Execute tasks in dependency order (topological sort)
-      const execution_order = this.topological_sort(plan.tasks, plan.edges);
+      // Execute tasks level-by-level (topological layers). Tasks within the
+      // same level have no dependency on each other, so they're fanned out
+      // with Promise.all — the only serial point is between levels. Failed
+      // tasks cascade to dependents, which are marked 'skipped'.
+      const levels = this.topological_levels(plan.tasks, plan.edges);
 
-      for (const task of execution_order) {
-        // Check if dependencies succeeded
-        const deps_failed = task.dependencies.some(dep_id =>
-          plan.tasks.find(t => t.task_id === dep_id)?.status === 'failed'
+      for (const level of levels) {
+        await Promise.all(
+          level.map((task) =>
+            this.run_one_task(task, plan, tenant_context, event_callback, results).then(
+              (ok) => {
+                if (ok) tasks_completed++;
+                else tasks_failed++;
+              }
+            )
+          )
         );
-
-        if (deps_failed) {
-          task.status = 'skipped';
-          this.emit_event(event_callback, {
-            type: 'task_skipped',
-            plan_id,
-            task_id: task.task_id,
-            reason: 'Dependency failed',
-            timestamp: new Date().toISOString(),
-          });
-          continue;
-        }
-
-        // Execute task
-        task.status = 'running';
-        task.started_at = new Date().toISOString();
-
-        this.emit_event(event_callback, {
-          type: 'task_started',
-          plan_id,
-          task_id: task.task_id,
-          agent_id: task.assigned_agent,
-          agent_name: task.agent_name,
-          timestamp: new Date().toISOString(),
-        });
-
-        const task_start = Date.now();
-
-        try {
-          // Get agent and execute
-          const agent = await agent_runtime.get_agent(task.assigned_agent);
-          
-          // Build LedgerTaskStar
-          const ledger_task: LedgerTaskStar = {
-            id: task.task_id,
-            tenant_id: tenant_context.tenant_id,
-            name: task.name,
-            description: task.description,
-            required_capabilities: task.required_capabilities as LedgerCapability[],
-            assigned_agent: task.assigned_agent as LedgerAgentId,
-            status: 'assigned',
-            priority: 'normal',
-            input: { command: plan.command },
-            output: null,
-            dependencies: task.dependencies,
-            created_at: new Date().toISOString(),
-            started_at: null,
-            completed_at: null,
-            error: null,
-            retry_count: 0,
-            max_retries: 3,
-          };
-
-          const result = await agent.execute_task(ledger_task, tenant_context);
-          const task_duration = Date.now() - task_start;
-
-          task.status = result.success ? 'completed' : 'failed';
-          task.completed_at = new Date().toISOString();
-          task.duration_ms = task_duration;
-          task.result = result.output;
-          task.error = result.error;
-
-          results.push({
-            task_id: task.task_id,
-            agent_id: task.assigned_agent,
-            success: result.success,
-            output: result.output,
-            error: result.error,
-            duration_ms: task_duration,
-          });
-
-          if (result.success) {
-            tasks_completed++;
-            this.emit_event(event_callback, {
-              type: 'task_completed',
-              plan_id,
-              task_id: task.task_id,
-              agent_id: task.assigned_agent,
-              result: result.output,
-              error: null,
-              duration_ms: task_duration,
-              timestamp: new Date().toISOString(),
-            });
-          } else {
-            tasks_failed++;
-            this.emit_event(event_callback, {
-              type: 'task_failed',
-              plan_id,
-              task_id: task.task_id,
-              agent_id: task.assigned_agent,
-              error: result.error || 'Unknown error',
-              duration_ms: task_duration,
-              timestamp: new Date().toISOString(),
-            });
-          }
-        } catch (error) {
-          const task_duration = Date.now() - task_start;
-          const error_msg = error instanceof Error ? error.message : String(error);
-          
-          task.status = 'failed';
-          task.completed_at = new Date().toISOString();
-          task.duration_ms = task_duration;
-          task.error = error_msg;
-
-          tasks_failed++;
-
-          results.push({
-            task_id: task.task_id,
-            agent_id: task.assigned_agent,
-            success: false,
-            output: {},
-            error: error_msg,
-            duration_ms: task_duration,
-          });
-
-          this.emit_event(event_callback, {
-            type: 'task_failed',
-            plan_id,
-            task_id: task.task_id,
-            agent_id: task.assigned_agent,
-            error: error_msg,
-            duration_ms: task_duration,
-            timestamp: new Date().toISOString(),
-          });
-        }
       }
 
       const total_duration = Date.now() - start_time;
@@ -452,6 +338,197 @@ class OrchestrationService {
     }
 
     return sorted;
+  }
+
+  /**
+   * Group tasks by topological level. Level N contains tasks whose
+   * dependencies all live in levels < N. Independent tasks (no edges
+   * between them) can safely run in parallel within a level.
+   *
+   * Cycles fall back to a single level containing all tasks, preserving
+   * the old conservative behavior.
+   */
+  private topological_levels(
+    tasks: OrchestrationTask[],
+    edges: Array<{ from: string; to: string }>
+  ): OrchestrationTask[][] {
+    const in_degree = new Map<string, number>();
+    const adj_list = new Map<string, string[]>();
+    for (const t of tasks) {
+      in_degree.set(t.task_id, 0);
+      adj_list.set(t.task_id, []);
+    }
+    for (const e of edges) {
+      adj_list.get(e.from)?.push(e.to);
+      in_degree.set(e.to, (in_degree.get(e.to) ?? 0) + 1);
+    }
+
+    const task_map = new Map(tasks.map((t) => [t.task_id, t]));
+    const levels: OrchestrationTask[][] = [];
+    let remaining = tasks.length;
+    let current_level: string[] = [];
+    for (const [id, deg] of in_degree) {
+      if (deg === 0) current_level.push(id);
+    }
+
+    while (current_level.length > 0) {
+      const layer = current_level.map((id) => task_map.get(id)!);
+      levels.push(layer);
+      remaining -= layer.length;
+
+      const next_level: string[] = [];
+      for (const id of current_level) {
+        for (const neighbor of adj_list.get(id) ?? []) {
+          const d = (in_degree.get(neighbor) ?? 0) - 1;
+          in_degree.set(neighbor, d);
+          if (d === 0) next_level.push(neighbor);
+        }
+      }
+      current_level = next_level;
+    }
+
+    if (remaining !== 0) {
+      console.warn('[Orchestration] Cycle detected; collapsing into single level');
+      return [tasks];
+    }
+    return levels;
+  }
+
+  /**
+   * Execute a single orchestration task with retry-on-throw (exponential
+   * backoff, `task.max_retries` attempts). Returns true if the task
+   * ultimately succeeded, false otherwise. Side-effectful: mutates `task`
+   * status/result/error and appends to `results`.
+   */
+  private async run_one_task(
+    task: OrchestrationTask,
+    plan: OrchestrationPlan,
+    tenant_context: TenantContext,
+    event_callback: ((e: ExecutionEvent) => void) | undefined,
+    results: OrchestrationResult['results']
+  ): Promise<boolean> {
+    // Dependency failure cascade.
+    const deps_failed = task.dependencies.some(
+      (dep_id) => plan.tasks.find((t) => t.task_id === dep_id)?.status === 'failed'
+    );
+    if (deps_failed) {
+      task.status = 'skipped';
+      this.emit_event(event_callback, {
+        type: 'task_skipped',
+        plan_id: plan.plan_id,
+        task_id: task.task_id,
+        reason: 'Dependency failed',
+        timestamp: new Date().toISOString(),
+      });
+      return false;
+    }
+
+    task.status = 'running';
+    task.started_at = new Date().toISOString();
+    this.emit_event(event_callback, {
+      type: 'task_started',
+      plan_id: plan.plan_id,
+      task_id: task.task_id,
+      agent_id: task.assigned_agent,
+      agent_name: task.agent_name,
+      timestamp: new Date().toISOString(),
+    });
+
+    const task_start = Date.now();
+    const max_retries = 3; // Also hinted by LedgerTaskStar.max_retries below.
+
+    try {
+      const result = await retryWithBackoff({
+        maxRetries: max_retries,
+        baseDelayMs: 500,
+        maxDelayMs: 5_000,
+        jitter: true,
+        // A thrown error from execute_task means the agent itself bailed
+        // (bad input, system error). Retry those. If execute_task returns
+        // with { success: false }, we do NOT retry — it's a domain-level
+        // failure (wrong data, validation miss) that won't be helped by
+        // trying again.
+        retryable: (err) =>
+          err instanceof Error && !/invalid|validation|isolation/i.test(err.message),
+        attempt: async () => {
+          const agent = await agent_runtime.get_agent(task.assigned_agent);
+          const ledger_task: LedgerTaskStar = {
+            id: task.task_id,
+            tenant_id: tenant_context.tenant_id,
+            name: task.name,
+            description: task.description,
+            required_capabilities: task.required_capabilities as LedgerCapability[],
+            assigned_agent: task.assigned_agent as LedgerAgentId,
+            status: 'assigned',
+            priority: 'normal',
+            input: { command: plan.command },
+            output: null,
+            dependencies: task.dependencies,
+            created_at: new Date().toISOString(),
+            started_at: null,
+            completed_at: null,
+            error: null,
+            retry_count: 0,
+            max_retries,
+          };
+          return agent.execute_task(ledger_task, tenant_context);
+        },
+      });
+      const task_duration = Date.now() - task_start;
+
+      task.status = result.success ? 'completed' : 'failed';
+      task.completed_at = new Date().toISOString();
+      task.duration_ms = task_duration;
+      task.result = result.output;
+      task.error = result.error ?? undefined;
+
+      results.push({
+        task_id: task.task_id,
+        agent_id: task.assigned_agent,
+        success: result.success,
+        output: result.output,
+        error: result.error,
+        duration_ms: task_duration,
+      });
+
+      this.emit_event(event_callback, {
+        type: result.success ? 'task_completed' : 'task_failed',
+        plan_id: plan.plan_id,
+        task_id: task.task_id,
+        agent_id: task.assigned_agent,
+        ...(result.success
+          ? { result: result.output, error: null, duration_ms: task_duration }
+          : { error: result.error ?? 'Unknown error', duration_ms: task_duration }),
+        timestamp: new Date().toISOString(),
+      } as ExecutionEvent);
+
+      return result.success;
+    } catch (err) {
+      const task_duration = Date.now() - task_start;
+      const msg = err instanceof Error ? err.message : String(err);
+      task.status = 'failed';
+      task.completed_at = new Date().toISOString();
+      task.duration_ms = task_duration;
+      task.error = msg;
+      results.push({
+        task_id: task.task_id,
+        agent_id: task.assigned_agent,
+        success: false,
+        output: {},
+        error: msg,
+        duration_ms: task_duration,
+      });
+      this.emit_event(event_callback, {
+        type: 'task_failed',
+        plan_id: plan.plan_id,
+        task_id: task.task_id,
+        agent_id: task.assigned_agent,
+        error: msg,
+        duration_ms: task_duration,
+        timestamp: new Date().toISOString(),
+      });
+      return false;
+    }
   }
 
   /**

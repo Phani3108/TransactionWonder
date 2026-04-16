@@ -20,6 +20,14 @@ interface CompletionOptions {
   temperature?: number;
   max_tokens?: number;
   model?: string;
+  /**
+   * Whether to scrub PII (SSN, credit card, phone, email, etc.) from the
+   * user prompt + system prompt before sending to the LLM. Defaults to
+   * **true**: safer by default for a financial system. Pass `false` only
+   * when the caller has already done the redaction itself (e.g., the skills
+   * layer has its own per-skill `redactPII` hook).
+   */
+  redact_pii?: boolean;
 }
 
 interface InvoiceParseResult {
@@ -45,6 +53,7 @@ interface InvoiceParseResult {
 // Import shared retry helper. Circuit breaker is wrapped inside.
 import { retryWithBackoff } from '../integrations/http';
 import { llm_circuit_breaker } from '../guardrails/circuit-breaker';
+import { redact_pii } from '../guardrails/validators';
 
 // Internal: retry + circuit-breaker gate for the LLM provider.
 async function httpRequestRetry<T>(opts: {
@@ -73,7 +82,16 @@ export async function complete(
     temperature = 0.7,
     max_tokens = 4096,
     model = 'deepseek-chat', // Default to DeepSeek Chat
+    redact_pii: should_redact = true,
   } = options;
+
+  // P1-11: Default-on PII redaction. This is a financial system — vendor
+  // emails, phone numbers, SSNs, card fragments can all leak through
+  // free-form prompts. redact_pii() is idempotent (safe to run multiple
+  // times) so the skills layer's per-skill hook and this layer can
+  // coexist without double-mangling data.
+  const safe_prompt = should_redact ? redact_pii(prompt) : prompt;
+  const safe_system = should_redact ? redact_pii(system) : system;
 
   const start_time = Date.now();
   const opik = get_opik_client();
@@ -95,8 +113,8 @@ export async function complete(
           max_tokens,
           temperature,
           messages: [
-            { role: 'system', content: system },
-            { role: 'user', content: prompt },
+            { role: 'system', content: safe_system },
+            { role: 'user', content: safe_prompt },
           ],
         }),
       // Only retry on likely-transient errors. 4xx from the model provider
