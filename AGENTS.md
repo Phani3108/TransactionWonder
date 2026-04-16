@@ -1,11 +1,11 @@
-# ClawKeeper Agents Index
+# TransactionWonder Agents Index
 
-Canonical index of agents in the ClawKeeper AI Bookkeeping system. Total: 110 agents across 3 layers.
+Canonical index of agents in the TransactionWonder AI Bookkeeping system. Total: 110 agents across 3 layers.
 
 ## Architecture
 
 ```
-ClawKeeper (CEO)
+TransactionWonder (CEO)
 ├── CFO (8 workers)
 ├── Accounts Payable Lead (15 workers)
 ├── Accounts Receivable Lead (15 workers)
@@ -21,7 +21,7 @@ ClawKeeper (CEO)
 
 | Agent | Path | Role | Framework |
 |-------|------|------|-----------|
-| ClawKeeper | agents/clawkeeper/AGENT.md | Virtual CEO; orchestrates 9 domain leads | Clawd |
+| TransactionWonder | agents/ceo/AGENT.md | Virtual CEO; orchestrates 9 domain leads | Clawd |
 
 ## Orchestrator Layer (9 C-Level Leads)
 

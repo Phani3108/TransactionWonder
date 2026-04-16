@@ -6,12 +6,12 @@
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
 
-const sql = postgres(process.env.DATABASE_URL || 'postgresql://localhost:5432/clawkeeper', {
+const sql = postgres(process.env.DATABASE_URL || 'postgresql://localhost:5432/transactionwonder', {
   max: 1,
 });
 
 async function setup_demo() {
-  console.log('🚀 Setting up ClawKeeper demo environment...\n');
+  console.log('🚀 Setting up TransactionWonder demo environment...\n');
 
   try {
     // Create demo tenant

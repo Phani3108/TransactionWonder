@@ -50,7 +50,7 @@ export function LoginPage() {
           <div className="space-y-2">
             <CardTitle className="text-2xl font-bold tracking-tight text-obsidian">Welcome back</CardTitle>
             <CardDescription className="text-subtle">
-              Sign in to your ClawKeeper account
+              Sign in to your TransactionWonder account
             </CardDescription>
           </div>
         </CardHeader>

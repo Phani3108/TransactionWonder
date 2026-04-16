@@ -1,5 +1,5 @@
 // file: src/core/llm-client.ts
-// description: LLM client for ClawKeeper agent system with DeepSeek support
+// description: LLM client for TransactionWonder agent system with DeepSeek support
 // reference: src/core/types.ts, src/core/observability.ts
 
 import OpenAI from 'openai';

@@ -1,4 +1,4 @@
-# Financial Modeler - ClawKeeper CFO Worker
+# Financial Modeler - TransactionWonder CFO Worker
 
 ## Identity
 

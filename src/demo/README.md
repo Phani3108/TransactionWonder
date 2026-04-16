@@ -1,6 +1,6 @@
-# ClawKeeper Demo Data
+# TransactionWonder Demo Data
 
-This directory contains tools and data for generating realistic demo/seed data for ClawKeeper development and testing.
+This directory contains tools and data for generating realistic demo/seed data for TransactionWonder development and testing.
 
 ## Purpose
 
@@ -8,7 +8,7 @@ The demo data system provides:
 - **Realistic test data** for development without real customer information
 - **Agent scenario testing** for validating agent behaviors
 - **Integration testing** with sample Plaid, Stripe, and QuickBooks data
-- **Demo environment** for showcasing ClawKeeper capabilities
+- **Demo environment** for showcasing TransactionWonder capabilities
 
 ## Directory Structure
 
@@ -92,7 +92,7 @@ bun run demo:setup
 
 This runs:
 1. `demo:download` - Download public financial datasets (Python)
-2. `demo:transform` - Normalize downloaded data to ClawKeeper schema
+2. `demo:transform` - Normalize downloaded data to TransactionWonder schema
 3. `demo:generate` - Generate additional synthetic data
 4. `demo:seed` - Seed database with combined data
 
@@ -196,8 +196,8 @@ To reset demo data:
 
 ```bash
 # Drop and recreate database
-dropdb clawkeeper
-createdb clawkeeper
+dropdb transactionwonder
+createdb transactionwonder
 
 # Re-run database setup
 bun run db:setup

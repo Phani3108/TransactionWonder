@@ -1,5 +1,5 @@
 // file: src/api/routes/reconciliation.ts
-// description: Bank reconciliation routes for ClawKeeper API
+// description: Bank reconciliation routes for TransactionWonder API
 // reference: src/core/types.ts
 
 import { Hono } from 'hono';
@@ -44,7 +44,7 @@ export function reconciliation_routes(sql: Sql<Record<string, unknown>>) {
       RETURNING *
     `;
 
-    // Trigger reconciliation agent (via ClawKeeper)
+    // Trigger reconciliation agent (via TransactionWonder)
     // For now, return task ID for polling
 
     return c.json({

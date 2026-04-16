@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # file: src/demo/download/download_datasets.py
-# description: Downloads Hugging Face datasets for ClawKeeper demo
+# description: Downloads Hugging Face datasets for TransactionWonder demo
 # reference: requirements.txt
 
 import os
@@ -131,7 +131,7 @@ def main():
     """Download all datasets"""
     print("""
 ╔═══════════════════════════════════════════════════════════╗
-║  ClawKeeper Demo Data Download                            ║
+║  TransactionWonder Demo Data Download                            ║
 ║  Downloading 8 Hugging Face datasets                      ║
 ╚═══════════════════════════════════════════════════════════╝
     """)

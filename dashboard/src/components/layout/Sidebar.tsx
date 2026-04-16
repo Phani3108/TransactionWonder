@@ -80,7 +80,7 @@ export function Sidebar() {
             <span className="text-primary-foreground font-bold text-lg">🔐</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold">ClawKeeper</h1>
+            <h1 className="text-xl font-bold">TransactionWonder</h1>
             <p className="text-xs text-muted-foreground">AI Bookkeeping</p>
           </div>
         </div>

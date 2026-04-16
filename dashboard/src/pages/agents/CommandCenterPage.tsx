@@ -119,7 +119,7 @@ export function CommandCenterPage() {
           Command Center
         </h1>
         <p className="text-muted-foreground mt-1">
-          Deploy agents with a single prompt - describe your goal and let ClawKeeper orchestrate the work
+          Deploy agents with a single prompt - describe your goal and let TransactionWonder orchestrate the work
         </p>
       </div>
 

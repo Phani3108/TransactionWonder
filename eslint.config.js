@@ -1,5 +1,5 @@
 // file: eslint.config.js
-// description: ESLint configuration for ClawKeeper enforcing snake_case conventions
+// description: ESLint configuration for TransactionWonder enforcing snake_case conventions
 // reference: CLAUDE.md, package.json
 
 import js from '@eslint/js';

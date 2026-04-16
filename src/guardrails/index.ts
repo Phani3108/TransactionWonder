@@ -1,5 +1,5 @@
 // file: src/guardrails/index.ts
-// description: Guardrails exports for ClawKeeper security
+// description: Guardrails exports for TransactionWonder security
 // reference: validators.ts, rate-limiter.ts, circuit-breaker.ts, audit-logger.ts
 
 export * from './validators';

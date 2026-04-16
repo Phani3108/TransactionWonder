@@ -7,7 +7,7 @@ description: "Synchronize data with external accounting systems (QuickBooks, Xer
 
 ## Purpose
 
-Synchronizes financial data between ClawKeeper and external systems (QuickBooks, Xero, Plaid) with proper data mapping, conflict resolution, and error handling.
+Synchronizes financial data between TransactionWonder and external systems (QuickBooks, Xero, Plaid) with proper data mapping, conflict resolution, and error handling.
 
 ## Triggers
 
@@ -32,7 +32,7 @@ Synchronizes financial data between ClawKeeper and external systems (QuickBooks,
 #### Export to QuickBooks
 
 ```typescript
-// Map ClawKeeper invoice to QuickBooks invoice
+// Map TransactionWonder invoice to QuickBooks invoice
 function map_to_quickbooks(invoice: Invoice): QBInvoice {
   return {
     CustomerRef: { value: invoice.customer_id },
@@ -56,7 +56,7 @@ const qb_invoice = await quickbooks.createInvoice(qb_data);
 
 // Store mapping
 await store_sync_mapping({
-  clawkeeper_id: invoice.id,
+  tw_internal_id: invoice.id,
   external_system: 'quickbooks',
   external_id: qb_invoice.Id,
   entity_type: 'invoice',
@@ -73,7 +73,7 @@ const qb_invoices = await quickbooks.query({
   type: 'Invoice',
 });
 
-// Map to ClawKeeper format
+// Map to TransactionWonder format
 for (const qb_inv of qb_invoices) {
   const invoice = map_from_quickbooks(qb_inv);
   
@@ -82,12 +82,12 @@ for (const qb_inv of qb_invoices) {
   
   if (mapping) {
     // Update existing
-    await update_invoice(mapping.clawkeeper_id, invoice);
+    await update_invoice(mapping.tw_internal_id, invoice);
   } else {
     // Create new
     const created = await create_invoice(invoice);
     await store_sync_mapping({
-      clawkeeper_id: created.id,
+      tw_internal_id: created.id,
       external_system: 'quickbooks',
       external_id: qb_inv.Id,
       entity_type: 'invoice',
@@ -116,7 +116,7 @@ const transactions = await plaid_client.transactionsGet({
   end_date: '2026-01-31',
 });
 
-// Import to ClawKeeper
+// Import to TransactionWonder
 for (const txn of transactions.transactions) {
   // Check if already imported
   const existing = await find_transaction_by_plaid_id(txn.transaction_id);
@@ -144,11 +144,11 @@ When same entity modified in both systems:
 
 Conflict detection:
 ```typescript
-if (clawkeeper_updated_at > external_updated_at && external_updated_at > last_sync_time) {
+if (tw_internal_updated_at > external_updated_at && external_updated_at > last_sync_time) {
   // Conflict! Both systems updated since last sync
   flag_for_manual_review({
     entity: 'invoice',
-    clawkeeper_version: ck_invoice,
+    tw_internal_version: ck_invoice,
     external_version: qb_invoice,
     conflict_type: 'concurrent_modification',
   });
@@ -175,7 +175,7 @@ Only fetch records modified since `last_sync_time`.
 
 ### Schema Mapping Table
 
-| ClawKeeper Field | QuickBooks Field | Xero Field |
+| TransactionWonder Field | QuickBooks Field | Xero Field |
 |------------------|------------------|------------|
 | vendor_name | Vendor.DisplayName | Contact.Name |
 | invoice_date | TxnDate | Date |

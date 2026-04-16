@@ -38,8 +38,8 @@ export const use_auth_store = create<AuthState>((set) => ({
       const { user, token } = await response.json();
       
       // Store token and user in localStorage
-      localStorage.setItem('clawkeeper_token', token);
-      localStorage.setItem('clawkeeper_user', JSON.stringify(user));
+      localStorage.setItem('transactionwonder_token', token);
+      localStorage.setItem('transactionwonder_user', JSON.stringify(user));
       
       set({
         user,
@@ -53,8 +53,8 @@ export const use_auth_store = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('clawkeeper_token');
-    localStorage.removeItem('clawkeeper_user');
+    localStorage.removeItem('transactionwonder_token');
+    localStorage.removeItem('transactionwonder_user');
     set({
       user: null,
       token: null,
@@ -72,8 +72,8 @@ export const use_auth_store = create<AuthState>((set) => ({
 }));
 
 // Initialize auth state from localStorage on app load
-const stored_token = localStorage.getItem('clawkeeper_token');
-const stored_user_str = localStorage.getItem('clawkeeper_user');
+const stored_token = localStorage.getItem('transactionwonder_token');
+const stored_user_str = localStorage.getItem('transactionwonder_user');
 
 if (stored_token && stored_user_str) {
   try {
@@ -86,7 +86,7 @@ if (stored_token && stored_user_str) {
     });
   } catch (error) {
     // Invalid stored data, clear everything
-    localStorage.removeItem('clawkeeper_token');
-    localStorage.removeItem('clawkeeper_user');
+    localStorage.removeItem('transactionwonder_token');
+    localStorage.removeItem('transactionwonder_user');
   }
 }

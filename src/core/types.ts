@@ -1,5 +1,5 @@
 // file: src/core/types.ts
-// description: Core type definitions for ClawKeeper Ledger domain
+// description: Core type definitions for TransactionWonder Ledger domain
 // reference: Extends Constellation types for financial workflows
 
 import { z } from 'zod';
@@ -272,7 +272,7 @@ export type AuditEntry = z.infer<typeof AuditEntry>;
 
 export const LedgerAgentId = z.enum([
   // CEO
-  'clawkeeper',
+  'ceo',
   // Orchestrators
   'cfo',
   'accounts_payable_lead',

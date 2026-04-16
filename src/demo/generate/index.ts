@@ -38,7 +38,7 @@ function save_json(filename: string, data: any) {
 async function main() {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║  ClawKeeper Synthetic Data Generation                     ║
+║  TransactionWonder Synthetic Data Generation                     ║
 ║  Generating data for all 110 agents across 9 domains      ║
 ╚═══════════════════════════════════════════════════════════╝
   `);

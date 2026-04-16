@@ -219,7 +219,7 @@ export function generate_agent_scenarios(): AgentScenario[] {
       scenario_name: 'Stripe Webhook Processing',
       description: 'Process incoming Stripe invoice.paid webhook',
       input_data: { webhook_type: 'invoice.paid', invoice_id: 'in_12345' },
-      expected_outcome: 'Invoice marked as paid in ClawKeeper',
+      expected_outcome: 'Invoice marked as paid in TransactionWonder',
       success_criteria: ['Webhook validated', 'Invoice updated', 'Reconciliation triggered']
     }
   );

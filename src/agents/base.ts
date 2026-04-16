@@ -1,5 +1,5 @@
 // file: src/agents/base.ts
-// description: Base agent class for ClawKeeper with tenant context, audit logging, and Opik observability
+// description: Base agent class for TransactionWonder with tenant context, audit logging, and Opik observability
 // reference: src/core/types.ts, src/core/observability.ts
 
 import { v4 as uuid } from 'uuid';

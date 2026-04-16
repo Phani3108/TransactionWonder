@@ -1,6 +1,6 @@
-# ClawKeeper Worker Agents Summary
+# TransactionWonder Worker Agents Summary
 
-This document outlines all 100 worker agents in the ClawKeeper system. Each worker has a corresponding AGENT.md file in `agents/workers/<domain>/<worker-name>/AGENT.md`.
+This document outlines all 100 worker agents in the TransactionWonder system. Each worker has a corresponding AGENT.md file in `agents/workers/<domain>/<worker-name>/AGENT.md`.
 
 ## CFO Workers (8) ✅ CREATED
 

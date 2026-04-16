@@ -1,5 +1,5 @@
 -- Migration: 001_create_memories_table
--- Description: Create the memories table for the ClawKeeper memory system
+-- Description: Create the memories table for the TransactionWonder memory system
 -- Created: 2025-01-XX (auto-generated)
 
 -- ============================================================================
@@ -134,7 +134,7 @@ CREATE TRIGGER memories_updated_at_trigger
 -- Comments for Documentation
 -- ============================================================================
 
-COMMENT ON TABLE memories IS 'Agent memory storage with tenant isolation for ClawKeeper AI bookkeeping system';
+COMMENT ON TABLE memories IS 'Agent memory storage with tenant isolation for TransactionWonder AI bookkeeping system';
 COMMENT ON COLUMN memories.id IS 'Unique memory identifier (UUID)';
 COMMENT ON COLUMN memories.tenant_id IS 'Tenant identifier for multi-tenancy isolation';
 COMMENT ON COLUMN memories.agent_id IS 'Agent identifier (e.g., cfo, accounts_payable_lead)';
@@ -150,8 +150,8 @@ COMMENT ON COLUMN memories.deleted_at IS 'Soft delete timestamp (NULL = active, 
 -- ============================================================================
 
 -- Grant permissions to application role (adjust role name as needed)
--- GRANT SELECT, INSERT, UPDATE ON memories TO clawkeeper_app;
--- GRANT USAGE ON SEQUENCE memories_id_seq TO clawkeeper_app;
+-- GRANT SELECT, INSERT, UPDATE ON memories TO transactionwonder_app;
+-- GRANT USAGE ON SEQUENCE memories_id_seq TO transactionwonder_app;
 
 -- ============================================================================
 -- Migration Complete

@@ -1,5 +1,5 @@
 // file: src/memory/types.ts
-// description: Type definitions for the ClawKeeper memory system
+// description: Type definitions for the TransactionWonder memory system
 // reference: src/core/types.ts
 
 import { z } from 'zod';

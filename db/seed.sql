@@ -1,4 +1,4 @@
--- ClawKeeper Seed Data
+-- TransactionWonder Seed Data
 -- Initial data for development and testing
 
 -- ============================================================================

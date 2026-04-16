@@ -1,15 +1,15 @@
-// file: src/agents/clawkeeper.ts
-// description: ClawKeeper CEO agent - orchestrates all financial workflows
+// file: src/agents/ceo.ts
+// description: TransactionWonder CEO agent - orchestrates all financial workflows
 // reference: src/agents/base.ts, src/core/llm-client.ts
 
 import { BaseAgent, type AgentConfig } from './base';
 import type { LedgerTaskStar, LedgerAgentId } from '../core/types';
 import * as llm from '../core/llm-client';
 
-const CLAWKEEPER_CONFIG: AgentConfig = {
-  id: 'clawkeeper',
-  name: 'ClawKeeper',
-  description: 'Autonomous CEO of ClawKeeper - orchestrates all financial workflows',
+const TRANSACTIONWONDER_CONFIG: AgentConfig = {
+  id: 'ceo',
+  name: 'TransactionWonder',
+  description: 'Autonomous CEO of TransactionWonder - orchestrates all financial workflows',
   capabilities: [
     'invoice_parsing',
     'invoice_validation',
@@ -29,19 +29,19 @@ interface ConstellationDAG {
   edges: Array<{ from: string; to: string }>;
 }
 
-export class ClawKeeperAgent extends BaseAgent {
+export class CeoAgent extends BaseAgent {
   private orchestrators: Map<LedgerAgentId, BaseAgent> = new Map();
 
   constructor(config: Partial<AgentConfig> = {}) {
-    super({ ...CLAWKEEPER_CONFIG, ...config });
+    super({ ...TRANSACTIONWONDER_CONFIG, ...config });
   }
 
   protected async execute(task: LedgerTaskStar): Promise<Record<string, unknown>> {
     const { name, input, required_capabilities } = task;
     const tenant = this.ensure_tenant_context();
 
-    console.log(`[ClawKeeper] Processing: ${name} (Tenant: ${tenant.tenant_id})`);
-    console.log(`[ClawKeeper] Capabilities needed: ${required_capabilities.join(", ")}`);
+    console.log(`[TransactionWonder] Processing: ${name} (Tenant: ${tenant.tenant_id})`);
+    console.log(`[TransactionWonder] Capabilities needed: ${required_capabilities.join(", ")}`);
 
     // Route based on request type
     const request_text = String(input.request || input.description || "");
@@ -73,7 +73,7 @@ export class ClawKeeperAgent extends BaseAgent {
     request: string,
     task: LedgerTaskStar
   ): Promise<Record<string, unknown>> {
-    console.log('[ClawKeeper] Decomposing complex request into DAG...');
+    console.log('[TransactionWonder] Decomposing complex request into DAG...');
 
     // Use LLM to decompose request
     const tasks = await llm.decompose_financial_task(request);
@@ -152,7 +152,7 @@ export class ClawKeeperAgent extends BaseAgent {
     orchestrator_id: LedgerAgentId,
     task: LedgerTaskStar
   ): Promise<Record<string, unknown>> {
-    console.log(`[ClawKeeper] Delegating to ${orchestrator_id}`);
+    console.log(`[TransactionWonder] Delegating to ${orchestrator_id}`);
 
     // In full implementation, this would call the actual orchestrator agent
     // For now, return simulated result
@@ -168,24 +168,24 @@ export class ClawKeeperAgent extends BaseAgent {
     // Handle simple tasks directly
     const request = String(task.input.request || task.description);
 
-    console.log(`[ClawKeeper] Executing directly: ${request}`);
+    console.log(`[TransactionWonder] Executing directly: ${request}`);
 
     // Use LLM for general financial queries
     const response = await llm.complete(request, {
-      system: 'You are ClawKeeper, an autonomous bookkeeping AI. Provide clear, accurate financial guidance.',
+      system: 'You are TransactionWonder, an autonomous bookkeeping AI. Provide clear, accurate financial guidance.',
       temperature: 0.3,
     });
 
     return {
       response,
       task_id: task.id,
-      handled_by: 'clawkeeper_direct',
+      handled_by: 'ceo_direct',
     };
   }
 
   register_orchestrator(id: LedgerAgentId, agent: BaseAgent): void {
     this.orchestrators.set(id, agent);
-    console.log(`[ClawKeeper] Registered orchestrator: ${id}`);
+    console.log(`[TransactionWonder] Registered orchestrator: ${id}`);
   }
 }
 
@@ -196,9 +196,9 @@ export class ClawKeeperAgent extends BaseAgent {
 import { v4 as uuid } from 'uuid';
 
 if (import.meta.main) {
-  console.log('ClawKeeper CEO Agent Starting...\n');
+  console.log('TransactionWonder CEO Agent Starting...\n');
 
-  const agent = new ClawKeeperAgent();
+  const agent = new CeoAgent();
   await agent.start();
 
   // Test execution
@@ -214,7 +214,7 @@ if (import.meta.main) {
     name: 'Process Invoice',
     description: 'Process uploaded invoice from Office Depot',
     required_capabilities: ['invoice_parsing', 'invoice_validation'],
-    assigned_agent: 'clawkeeper',
+    assigned_agent: 'ceo',
     status: 'assigned',
     priority: 'normal',
     input: { request: 'Parse and validate invoice from Office Depot for $250' },

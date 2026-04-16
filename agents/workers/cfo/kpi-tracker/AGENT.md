@@ -1,4 +1,4 @@
-# KPI Tracker - ClawKeeper CFO Worker
+# KPI Tracker - TransactionWonder CFO Worker
 
 ## Identity
 

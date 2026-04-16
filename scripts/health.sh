@@ -1,7 +1,7 @@
 #!/bin/bash
-# ClawKeeper Health Check Script
+# TransactionWonder Health Check Script
 
-echo "🔐 ClawKeeper Health Check"
+echo "🔐 TransactionWonder Health Check"
 echo "========================="
 echo ""
 
@@ -47,7 +47,7 @@ fi
 
 echo ""
 echo "Agent Status:"
-echo "  CEO: ClawKeeper"
+echo "  CEO: TransactionWonder"
 echo "  Orchestrators: 9"
 echo "  Workers: 100"
 echo ""

@@ -1,4 +1,4 @@
-# ClawKeeper Steering Principles
+# TransactionWonder Steering Principles
 
 ## Mission
 
@@ -42,7 +42,7 @@ Automate bookkeeping for SMBs with precision, security, and compliance at the co
 
 ### Hierarchy
 ```
-ClawKeeper (CEO) -> 9 Orchestrators -> 100 Workers
+TransactionWonder (CEO) -> 9 Orchestrators -> 100 Workers
 ```
 
 ### Delegation Rules
@@ -152,4 +152,4 @@ ClawKeeper (CEO) -> 9 Orchestrators -> 100 Workers
 
 ---
 
-These principles guide all decisions in ClawKeeper development and deployment.
+These principles guide all decisions in TransactionWonder development and deployment.

@@ -1,5 +1,5 @@
 // file: src/api/server.ts
-// description: Hono API server for ClawKeeper with multi-tenant support
+// description: Hono API server for TransactionWonder with multi-tenant support
 // reference: src/api/routes/*.ts, Constellation server pattern
 
 import { Hono } from 'hono';
@@ -129,7 +129,7 @@ app.get('/health', (c) => {
   return c.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'clawkeeper-api',
+    service: 'transactionwonder-api',
     version: '0.1.0',
   });
 });
@@ -182,7 +182,7 @@ Continuing with port ${port} anyway, but connections may fail...
 
 console.log(`
 ╔═════════════════════════════════════════════════════════════════╗
-║  🔐 ClawKeeper API Server                                       ║
+║  🔐 TransactionWonder API Server                                       ║
 ╚═════════════════════════════════════════════════════════════════╝
 
 Port:        ${port}

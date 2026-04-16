@@ -1,4 +1,4 @@
-# Budget Manager - ClawKeeper CFO Worker
+# Budget Manager - TransactionWonder CFO Worker
 
 ## Identity
 

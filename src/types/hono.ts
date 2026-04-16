@@ -1,5 +1,5 @@
 // file: src/types/hono.ts
-// description: Hono type definitions for ClawKeeper API context
+// description: Hono type definitions for TransactionWonder API context
 // reference: src/api/server.ts, src/db/with-context.ts
 
 import type { Context } from 'hono';

@@ -1,5 +1,5 @@
 // file: src/demo/transform/support.ts
-// description: Transform support ticket dataset to ClawKeeper schema
+// description: Transform support ticket dataset to TransactionWonder schema
 // reference: transform/index.ts
 
 import { writeFileSync } from 'fs';

@@ -140,7 +140,7 @@ export function AgentsPage() {
       <div>
         <h1 className="text-3xl font-bold mb-2">AI Agents</h1>
         <p className="text-muted-foreground">
-          Manage and monitor all {agent_data?.counts?.total} ClawKeeper AI agents
+          Manage and monitor all {agent_data?.counts?.total} TransactionWonder AI agents
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-# Risk Assessor - ClawKeeper CFO Worker
+# Risk Assessor - TransactionWonder CFO Worker
 
 ## Identity
 

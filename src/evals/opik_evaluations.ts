@@ -1,5 +1,5 @@
 // file: src/evals/opik_evaluations.ts
-// description: Opik evaluation framework for ClawKeeper agent testing
+// description: Opik evaluation framework for TransactionWonder agent testing
 // reference: src/core/observability.ts, src/agents/base.ts
 
 import { get_opik_client, is_opik_enabled } from '../core/observability';

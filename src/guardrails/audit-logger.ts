@@ -1,5 +1,5 @@
 // file: src/guardrails/audit-logger.ts
-// description: Audit logging for ClawKeeper with immutable trail
+// description: Audit logging for TransactionWonder with immutable trail
 // reference: db/schema.sql audit_log table
 
 import type { Sql } from 'postgres';

@@ -1,7 +1,7 @@
-// ClawKeeper Clawdbot Configuration (Development Mode)
+// TransactionWonder Clawdbot Configuration (Development Mode)
 // 
 // DEV MODE: For internal TechTide development ecosystem
-// - ClawKeeper runs under Axel (TechTide CEO agent) orchestration
+// - TransactionWonder runs under Axel (TechTide CEO agent) orchestration
 // - Uses shared development gateway and resources
 // - Suitable for development, testing, and integration work
 //
@@ -11,11 +11,11 @@
   // Routing configuration
   routing: {
     agents: {
-      clawkeeper: {
-        name: "ClawKeeper",
-        workspace: "~/clawkeeper",
+      ceo: {
+        name: "TransactionWonder",
+        workspace: "~/transactionwonder",
         sandbox: { mode: "off" },
-        // In dev mode, ClawKeeper reports to Axel (TechTide ecosystem)
+        // In dev mode, TransactionWonder reports to Axel (TechTide ecosystem)
         parent: "axel"
       }
     },
@@ -27,7 +27,7 @@
   // Session configuration
   session: {
     mainKey: "main",  // Axel is main in dev mode
-    agentKey: "clawkeeper"  // ClawKeeper's session key
+    agentKey: "ceo"  // TransactionWonder's session key
   },
 
   // Heartbeat
@@ -79,8 +79,8 @@
     }
   },
 
-  // ClawKeeper-specific settings
-  clawkeeper: {
+  // TransactionWonder-specific settings
+  ceo: {
     mode: "dev",
     api_port: 4004,
     dashboard_port: 5174,

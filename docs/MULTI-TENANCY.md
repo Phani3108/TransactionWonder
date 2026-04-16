@@ -1,8 +1,8 @@
-# ClawKeeper Multi-Tenancy Guide
+# TransactionWonder Multi-Tenancy Guide
 
 ## Overview
 
-ClawKeeper is designed as a multi-tenant SaaS platform where each tenant's data is completely isolated from other tenants.
+TransactionWonder is designed as a multi-tenant SaaS platform where each tenant's data is completely isolated from other tenants.
 
 ## Isolation Strategy
 
@@ -316,4 +316,4 @@ assert(invoices_a.every(inv => inv.tenant_id === 'tenant-a-uuid'));
 
 ---
 
-Multi-tenancy is foundational to ClawKeeper's architecture. Never compromise tenant isolation.
+Multi-tenancy is foundational to TransactionWonder's architecture. Never compromise tenant isolation.

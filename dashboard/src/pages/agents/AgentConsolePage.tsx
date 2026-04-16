@@ -27,7 +27,7 @@ interface Agent {
 }
 
 export function AgentConsolePage() {
-  const [selected_agent_id, set_selected_agent_id] = useState<string>('clawkeeper');
+  const [selected_agent_id, set_selected_agent_id] = useState<string>('ceo');
   const [task_result, set_task_result] = useState<any>(null);
   const [is_executing, set_is_executing] = useState(false);
   const [execution_start_time, set_execution_start_time] = useState<number | null>(null);

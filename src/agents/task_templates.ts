@@ -10,7 +10,7 @@ export interface TaskTemplate {
 }
 
 export const TASK_TEMPLATES: Record<string, TaskTemplate[]> = {
-  clawkeeper: [
+  ceo: [
     {
       name: 'Process Invoice',
       description: 'Parse and validate an uploaded invoice',
@@ -266,7 +266,7 @@ export const TASK_TEMPLATES: Record<string, TaskTemplate[]> = {
       description: 'Transform legacy data format to new schema',
       parameters: {
         source_format: 'legacy_erp',
-        target_format: 'clawkeeper',
+        target_format: 'ceo',
         record_count: 5000,
       },
       capabilities: ['data_transformation'],

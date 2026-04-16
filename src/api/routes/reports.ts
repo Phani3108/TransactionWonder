@@ -1,5 +1,5 @@
 // file: src/api/routes/reports.ts
-// description: Financial reporting routes for ClawKeeper API
+// description: Financial reporting routes for TransactionWonder API
 // reference: src/core/types.ts
 
 import { Hono } from 'hono';

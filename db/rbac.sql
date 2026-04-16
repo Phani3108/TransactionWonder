@@ -1,4 +1,4 @@
--- ClawKeeper Role-Based Access Control (RBAC)
+-- TransactionWonder Role-Based Access Control (RBAC)
 -- Defines permissions for different user roles
 
 -- ============================================================================

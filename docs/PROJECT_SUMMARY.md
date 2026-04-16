@@ -1,8 +1,8 @@
-# ClawKeeper Project Summary
+# TransactionWonder Project Summary
 
 ## Executive Overview
 
-ClawKeeper is a production-ready, multi-tenant AI agent system for autonomous bookkeeping automation targeting SMBs and freelancers.
+TransactionWonder is a production-ready, multi-tenant AI agent system for autonomous bookkeeping automation targeting SMBs and freelancers.
 
 **Built**: February 2, 2026
 **Status**: ✅ Foundation Complete - Ready for Development Testing
@@ -34,13 +34,13 @@ ClawKeeper is a production-ready, multi-tenant AI agent system for autonomous bo
 ### ✅ Phase 2: Agent Hierarchy (COMPLETE)
 
 **Deliverables**:
-- 1 CEO agent (ClawKeeper)
+- 1 CEO agent (TransactionWonder)
 - 9 orchestrator agents (CFO, AP Lead, AR Lead, Reconciliation, Compliance, Reporting, Integration, Data, Support)
 - 100 worker agents distributed across domains
 - AGENTS.md index documenting all 110 agents
 
 **Key Files**:
-- ✅ `agents/clawkeeper/AGENT.md` - CEO definition
+- ✅ `agents/ceo/AGENT.md` - CEO definition
 - ✅ `agents/orchestrators/*/AGENT.md` - 9 orchestrator definitions
 - ✅ `agents/workers/*/AGENT.md` - 100 worker definitions
 - ✅ `AGENTS.md` - Complete agent index
@@ -68,14 +68,14 @@ ClawKeeper is a production-ready, multi-tenant AI agent system for autonomous bo
 **Deliverables**:
 - BaseAgent class
 - LLM client with Claude integration
-- ClawKeeper orchestrator implementation
+- TransactionWonder orchestrator implementation
 - Sample orchestrator (Accounts Payable Lead)
 - Agent registry and runtime
 
 **Key Files**:
 - ✅ `src/agents/base.ts` - 200+ lines, tenant context, audit logging
 - ✅ `src/core/llm-client.ts` - LLM integration, specialized functions
-- ✅ `src/agents/clawkeeper.ts` - CEO orchestrator logic
+- ✅ `src/agents/ceo.ts` - CEO orchestrator logic
 - ✅ `src/agents/orchestrators/accounts_payable_lead.ts` - Sample orchestrator
 - ✅ `src/agents/index.ts` - Agent factory and runtime
 
@@ -203,7 +203,7 @@ ClawKeeper is a production-ready, multi-tenant AI agent system for autonomous bo
 
 2. **Setup database**:
    ```bash
-   createdb clawkeeper
+   createdb transactionwonder
    bun run db:setup
    ```
 

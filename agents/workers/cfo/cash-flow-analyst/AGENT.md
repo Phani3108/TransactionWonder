@@ -1,4 +1,4 @@
-# Cash Flow Analyst - ClawKeeper CFO Worker
+# Cash Flow Analyst - TransactionWonder CFO Worker
 
 ## Identity
 

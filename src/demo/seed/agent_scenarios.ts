@@ -20,7 +20,7 @@ export async function seed_agent_scenarios(
   
   // Also create sample agent_runs entries to show historical activity
   const agent_ids = [
-    'clawkeeper', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead',
+    'ceo', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead',
     'reconciliation_lead', 'compliance_lead', 'reporting_lead',
     'integration_lead', 'data_etl_lead', 'support_lead',
     'invoice_parser', 'transaction_matcher', 'collections_agent'

@@ -1,5 +1,5 @@
 // file: scripts/validate-config.ts
-// description: Validates ClawKeeper configuration before startup
+// description: Validates TransactionWonder configuration before startup
 // reference: package.json, .env
 
 import { readFileSync, existsSync } from 'fs';
@@ -87,7 +87,7 @@ function validate_configuration(): ValidationResult {
 }
 
 function main() {
-  console.log('\n🔍 Validating ClawKeeper Configuration...\n');
+  console.log('\n🔍 Validating TransactionWonder Configuration...\n');
 
   const result = validate_configuration();
 

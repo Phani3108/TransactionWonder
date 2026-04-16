@@ -6,7 +6,7 @@ import postgres from 'postgres';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://clawkeeper:clawkeeper_password@localhost:5432/clawkeeper';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://transactionwonder:transactionwonder_password@localhost:5432/transactionwonder';
 
 async function run_migration(migration_file: string) {
   console.log(`Running migration: ${migration_file}`);

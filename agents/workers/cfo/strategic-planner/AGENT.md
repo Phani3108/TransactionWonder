@@ -1,4 +1,4 @@
-# Strategic Planner - ClawKeeper CFO Worker
+# Strategic Planner - TransactionWonder CFO Worker
 
 ## Identity
 

@@ -1,5 +1,5 @@
 {
-  "name": "clawkeeper",
+  "name": "transactionwonder",
   "version": "0.1.0",
   "description": "Autonomous AI Bookkeeping for SMBs",
   "type": "module",
@@ -67,7 +67,7 @@
     "claude",
     "bun"
   ],
-  "author": "ClawKeeper Contributors",
+  "author": "TransactionWonder Contributors",
   "license": "MIT",
   "engines": {
     "bun": ">=1.0.0",

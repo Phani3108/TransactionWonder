@@ -1,4 +1,4 @@
-# ClawKeeper Deployment Guide
+# TransactionWonder Deployment Guide
 
 ## Prerequisites
 
@@ -13,20 +13,20 @@
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/Alexi5000/ClawKeeper.git
-cd clawkeeper
+git clone https://github.com/Alexi5000/TransactionWonder.git
+cd ceo
 ```
 
 ### 2. Configure Environment
 
 ```bash
-cd ClawKeeper
+cd TransactionWonder
 cp .env.example .env
 ```
 
 Edit `.env` with your credentials:
 ```bash
-DATABASE_URL=postgresql://clawkeeper:password@localhost:5432/clawkeeper
+DATABASE_URL=postgresql://transactionwonder:password@localhost:5432/transactionwonder
 ANTHROPIC_API_KEY=sk-ant-...
 JWT_SECRET=your-production-secret-min-32-chars
 PLAID_CLIENT_ID=...
@@ -45,13 +45,13 @@ cd dashboard && bun install
 ### Create Database
 
 ```bash
-createdb clawkeeper
+createdb transactionwonder
 ```
 
 ### Run Migrations
 
 ```bash
-# From ClawKeeper root
+# From TransactionWonder root
 bun run db:setup
 ```
 
@@ -64,13 +64,13 @@ This runs:
 ### Verify Database
 
 ```bash
-psql clawkeeper -c "SELECT COUNT(*) FROM tenants;"
+psql transactionwonder -c "SELECT COUNT(*) FROM tenants;"
 # Should return 1 (demo tenant)
 ```
 
 ## Deployment
 
-ClawKeeper runs as a standalone CEO agent.
+TransactionWonder runs as a standalone CEO agent.
 
 ```bash
 chmod +x scripts/deploy.sh
@@ -107,7 +107,7 @@ bun run dashboard:dev
 ## Health Checks
 
 ```bash
-cd ./ClawKeeper
+cd ./TransactionWonder
 chmod +x scripts/health.sh
 ./scripts/health.sh
 ```
@@ -139,10 +139,10 @@ bun run dev
 
 ```bash
 # Verify PostgreSQL is running
-pg_isready -d clawkeeper
+pg_isready -d transactionwonder
 
 # Test connection
-psql clawkeeper -c "SELECT 1;"
+psql transactionwonder -c "SELECT 1;"
 
 # Check DATABASE_URL format
 echo $DATABASE_URL

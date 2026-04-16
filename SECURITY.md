@@ -2,7 +2,7 @@
 
 ## Reporting Security Vulnerabilities
 
-We take the security of ClawKeeper seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of TransactionWonder seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### How to Report
 
@@ -10,7 +10,7 @@ We take the security of ClawKeeper seriously. If you discover a security vulnera
 
 Instead, please email security reports to:
 
-**Email**: security@clawkeeper.ai (or create a private security advisory on GitHub)
+**Email**: security@ceo.ai (or create a private security advisory on GitHub)
 
 Include the following information:
 - Description of the vulnerability
@@ -43,7 +43,7 @@ Include the following information:
 
 ## Security Best Practices
 
-When deploying ClawKeeper:
+When deploying TransactionWonder:
 
 ### Environment Variables
 - Never commit `.env` files to version control
@@ -82,7 +82,7 @@ When deploying ClawKeeper:
 - Monitor for unusual patterns (excessive API calls, failed logins)
 
 ### Updates
-- Keep ClawKeeper updated to the latest version
+- Keep TransactionWonder updated to the latest version
 - Subscribe to security advisories
 - Test updates in staging before production
 
@@ -106,7 +106,7 @@ Circuit breakers protect external API calls. Monitor circuit breaker states to d
 
 ## Compliance
 
-ClawKeeper is designed with compliance in mind:
+TransactionWonder is designed with compliance in mind:
 
 - **GDPR**: Personal data can be exported and deleted per tenant
 - **SOC 2**: Audit logging and access controls support SOC 2 compliance
@@ -133,6 +133,6 @@ Built-in security features:
 For security-related questions (non-vulnerabilities):
 - Documentation: See `/docs` directory
 - General questions: Open a GitHub Discussion
-- Security team: security@clawkeeper.ai
+- Security team: security@ceo.ai
 
-Thank you for helping keep ClawKeeper secure!
+Thank you for helping keep TransactionWonder secure!

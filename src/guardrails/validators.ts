@@ -1,5 +1,5 @@
 // file: src/guardrails/validators.ts
-// description: Input/output validation and sanitization for ClawKeeper
+// description: Input/output validation and sanitization for TransactionWonder
 // reference: src/core/types.ts, ORCA SDK validators pattern
 
 import { z } from 'zod';

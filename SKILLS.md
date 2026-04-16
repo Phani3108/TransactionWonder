@@ -1,6 +1,6 @@
-# ClawKeeper Skills Index
+# TransactionWonder Skills Index
 
-Canonical index of skills available to ClawKeeper agents. Each skill lives under `skills/<name>/SKILL.md`.
+Canonical index of skills available to TransactionWonder agents. Each skill lives under `skills/<name>/SKILL.md`.
 
 ## Core Skills (8)
 
@@ -21,7 +21,7 @@ Agents invoke skills by natural language matching of the `description` field in 
 
 ### Example Invocation
 
-When ClawKeeper receives "Process this invoice", it:
+When TransactionWonder receives "Process this invoice", it:
 1. Matches to `invoice-processor` skill
 2. Loads `skills/invoice-processor/SKILL.md`
 3. Follows instructions to parse, validate, categorize

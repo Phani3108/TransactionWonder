@@ -1,4 +1,4 @@
-# ClawKeeper Quick Start Guide
+# TransactionWonder Quick Start Guide
 
 ## 🚨 Fixed Issues
 
@@ -76,7 +76,7 @@ If you get database errors, run the full setup:
 ```bash
 # 1. Make sure PostgreSQL is running
 # 2. Create the database
-createdb clawkeeper
+createdb transactionwonder
 
 # 3. Set up the database schema
 bun run db:setup
@@ -91,7 +91,7 @@ Your `.env` file should have:
 
 ```env
 # Database
-DATABASE_URL=postgresql://localhost:5432/clawkeeper
+DATABASE_URL=postgresql://localhost:5432/transactionwonder
 
 # API Server
 PORT=9100
@@ -140,7 +140,7 @@ I've fixed the agent deployment system:
 ### Still Getting 401 Errors?
 1. Open browser DevTools (F12)
 2. Go to Application → Local Storage
-3. Delete `clawkeeper_token` and `clawkeeper_user`
+3. Delete `transactionwonder_token` and `transactionwonder_user`
 4. Refresh the page
 5. Log in again
 
@@ -151,8 +151,8 @@ psql --version
 pg_isready
 
 # Recreate database
-dropdb clawkeeper
-createdb clawkeeper
+dropdb transactionwonder
+createdb transactionwonder
 bun run db:setup
 bun run setup:demo
 ```
@@ -176,7 +176,7 @@ Once logged in, try the Command Center:
 4. Review the plan
 5. Click "Execute Plan"
 
-Watch as ClawKeeper orchestrates multiple AI agents to complete your task!
+Watch as TransactionWonder orchestrates multiple AI agents to complete your task!
 
 ---
 

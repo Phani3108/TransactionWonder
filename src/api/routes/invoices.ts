@@ -1,5 +1,5 @@
 // file: src/api/routes/invoices.ts
-// description: Invoice management routes for ClawKeeper API
+// description: Invoice management routes for TransactionWonder API
 // reference: src/core/types.ts, src/api/server.ts
 
 import { Hono } from 'hono';

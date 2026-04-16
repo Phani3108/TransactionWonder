@@ -1,5 +1,5 @@
 // file: src/api/routes/auth.ts
-// description: Authentication routes for ClawKeeper API
+// description: Authentication routes for TransactionWonder API
 // reference: src/api/server.ts
 
 import { Hono } from 'hono';

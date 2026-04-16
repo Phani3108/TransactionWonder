@@ -1,4 +1,4 @@
-# ClawKeeper API Reference
+# TransactionWonder API Reference
 
 ## Base URL
 
@@ -267,8 +267,8 @@ Get all agent statuses.
 {
   "agents": [
     {
-      "id": "clawkeeper",
-      "name": "ClawKeeper",
+      "id": "ceo",
+      "name": "TransactionWonder",
       "status": "idle",
       "current_task": null
     }

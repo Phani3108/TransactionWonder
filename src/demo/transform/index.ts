@@ -1,5 +1,5 @@
 // file: src/demo/transform/index.ts
-// description: Main orchestrator for transforming downloaded datasets to ClawKeeper schema
+// description: Main orchestrator for transforming downloaded datasets to TransactionWonder schema
 // reference: download/download_datasets.py, seed/index.ts
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
@@ -29,8 +29,8 @@ interface TransformResult {
 async function main() {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║  ClawKeeper Data Transform                                ║
-║  Converting datasets to ClawKeeper schema                 ║
+║  TransactionWonder Data Transform                                ║
+║  Converting datasets to TransactionWonder schema                 ║
 ╚═══════════════════════════════════════════════════════════╝
   `);
 

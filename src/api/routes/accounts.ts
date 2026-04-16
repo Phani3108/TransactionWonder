@@ -1,5 +1,5 @@
 // file: src/api/routes/accounts.ts
-// description: Account management routes for ClawKeeper API
+// description: Account management routes for TransactionWonder API
 // reference: src/core/types.ts
 
 import { Hono } from 'hono';

@@ -1,5 +1,5 @@
 // file: src/guardrails/rate-limiter.ts
-// description: Token bucket rate limiter for ClawKeeper API
+// description: Token bucket rate limiter for TransactionWonder API
 // reference: ORCA SDK rate limiter pattern
 
 interface RateLimitConfig {

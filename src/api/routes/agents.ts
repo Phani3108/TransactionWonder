@@ -1,5 +1,5 @@
 // file: src/api/routes/agents.ts
-// description: Agent status and management routes for ClawKeeper API
+// description: Agent status and management routes for TransactionWonder API
 // reference: src/agents/index.ts, src/agents/orchestration_service.ts
 
 import { Hono } from 'hono';
@@ -22,13 +22,13 @@ export function agent_routes(sql: Sql<Record<string, unknown>>) {
     const counts = agent_runtime.get_agent_count();
     
     // Organize agents by type
-    const ceo = profiles.filter(p => p.id === 'clawkeeper');
+    const ceo = profiles.filter(p => p.id === 'ceo');
     const orchestrators = profiles.filter(p => 
       ['cfo', 'accounts_payable_lead', 'accounts_receivable_lead', 'reconciliation_lead',
        'compliance_lead', 'reporting_lead', 'integration_lead', 'data_etl_lead', 'support_lead'].includes(p.id)
     );
     const workers = profiles.filter(p => 
-      !['clawkeeper', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead', 'reconciliation_lead',
+      !['ceo', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead', 'reconciliation_lead',
         'compliance_lead', 'reporting_lead', 'integration_lead', 'data_etl_lead', 'support_lead'].includes(p.id)
     );
     
@@ -254,7 +254,7 @@ export function agent_routes(sql: Sql<Record<string, unknown>>) {
           tenant_id, agent_id, task_id, status, started_at, completed_at,
           duration_ms, tokens_used, cost, error
         ) VALUES (
-          ${tenant_id}, 'clawkeeper', ${plan_id},
+          ${tenant_id}, 'ceo', ${plan_id},
           ${result.status === 'completed' ? 'completed' : 'failed'},
           ${new Date().toISOString()},
           ${new Date().toISOString()},
@@ -327,7 +327,7 @@ export function agent_routes(sql: Sql<Record<string, unknown>>) {
                 tenant_id, agent_id, task_id, status, started_at, completed_at,
                 duration_ms, tokens_used, cost, error
               ) VALUES (
-                ${tenant_id}, 'clawkeeper', ${plan_id},
+                ${tenant_id}, 'ceo', ${plan_id},
                 ${result.status === 'completed' ? 'completed' : 'failed'},
                 ${new Date().toISOString()},
                 ${new Date().toISOString()},

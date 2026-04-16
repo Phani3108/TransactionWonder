@@ -7,7 +7,7 @@ import { use_tenant_store } from '../stores/tenant-store';
 
 type Theme = 'light' | 'dark';
 
-const STORAGE_KEY = 'clawkeeper-theme';
+const STORAGE_KEY = 'ceo-theme';
 
 export function use_theme() {
   const { tenant, update_settings } = use_tenant_store();

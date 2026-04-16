@@ -1,9 +1,9 @@
 // file: src/agents/index.ts
-// description: Agent factory and registry for ClawKeeper system
+// description: Agent factory and registry for TransactionWonder system
 // reference: src/agents/base.ts, Constellation pattern
 
 import { BaseAgent } from './base';
-import { ClawKeeperAgent } from './clawkeeper';
+import { CeoAgent } from './ceo';
 import { AccountsPayableLeadAgent } from './orchestrators/accounts_payable_lead';
 import { CFOAgent } from './orchestrators/cfo';
 import { AccountsReceivableLeadAgent } from './orchestrators/accounts_receivable_lead';
@@ -20,8 +20,8 @@ import type { LedgerAgentId } from '../core/types';
  */
 export function create_agent(agent_id: LedgerAgentId): BaseAgent {
   switch (agent_id) {
-    case 'clawkeeper':
-      return new ClawKeeperAgent();
+    case 'ceo':
+      return new CeoAgent();
     
     case 'accounts_payable_lead':
       return new AccountsPayableLeadAgent();
@@ -70,7 +70,7 @@ export class AgentRuntime {
       let agent: BaseAgent;
       
       // Try orchestrator/CEO agents first
-      if (['clawkeeper', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead',
+      if (['ceo', 'cfo', 'accounts_payable_lead', 'accounts_receivable_lead',
            'reconciliation_lead', 'compliance_lead', 'reporting_lead', 
            'integration_lead', 'data_etl_lead', 'support_lead'].includes(agent_id)) {
         agent = create_agent(agent_id as LedgerAgentId);
@@ -103,7 +103,7 @@ export class AgentRuntime {
     
     // Define orchestrator metadata (always include all 10, initialized or not)
     const ORCHESTRATOR_METADATA = [
-      { id: 'clawkeeper', name: 'ClawKeeper', description: 'Autonomous CEO of ClawKeeper - orchestrates all financial workflows', type: 'ceo', capabilities: ['invoice_parsing', 'invoice_validation', 'transaction_matching', 'report_generation', 'tax_compliance_check', 'payment_processing', 'bank_sync', 'accounting_sync', 'data_import', 'user_assistance'] },
+      { id: 'ceo', name: 'TransactionWonder', description: 'Autonomous CEO of TransactionWonder - orchestrates all financial workflows', type: 'ceo', capabilities: ['invoice_parsing', 'invoice_validation', 'transaction_matching', 'report_generation', 'tax_compliance_check', 'payment_processing', 'bank_sync', 'accounting_sync', 'data_import', 'user_assistance'] },
       { id: 'cfo', name: 'CFO', description: 'Strategic finance orchestrator managing planning, forecasting, and cash flow', type: 'orchestrator', capabilities: ['forecasting', 'report_analysis', 'report_generation'] },
       { id: 'accounts_payable_lead', name: 'Accounts Payable Lead', description: 'Vendor payment orchestrator managing invoice processing and payments', type: 'orchestrator', capabilities: ['invoice_parsing', 'invoice_validation', 'invoice_categorization', 'invoice_approval', 'payment_processing'] },
       { id: 'accounts_receivable_lead', name: 'Accounts Receivable Lead', description: 'Customer collections orchestrator managing invoicing and payments', type: 'orchestrator', capabilities: ['invoice_parsing', 'invoice_validation', 'payment_processing'] },

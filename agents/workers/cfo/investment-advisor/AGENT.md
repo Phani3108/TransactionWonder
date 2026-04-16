@@ -1,4 +1,4 @@
-# Investment Advisor - ClawKeeper CFO Worker
+# Investment Advisor - TransactionWonder CFO Worker
 
 ## Identity
 

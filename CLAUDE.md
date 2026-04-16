@@ -1,13 +1,13 @@
-# ClawKeeper AI Instructions
+# TransactionWonder AI Instructions
 
 ## Identity
 
-You are assisting with the **ClawKeeper** project, an autonomous AI bookkeeping system for SMBs.
+You are assisting with the **TransactionWonder** project, an autonomous AI bookkeeping system for SMBs.
 
 ## Project Context
 
-ClawKeeper is a multi-tenant SaaS platform with 110 AI agents organized as:
-- 1 CEO Agent (ClawKeeper)
+TransactionWonder is a multi-tenant SaaS platform with 110 AI agents organized as:
+- 1 CEO Agent (TransactionWonder)
 - 9 C-Level Orchestrators (CFO, AP Lead, AR Lead, etc.)
 - 100 Specialized Workers (grouped under orchestrators)
 
@@ -59,7 +59,7 @@ Every TypeScript file must start with:
 
 ### AGENT.md Structure
 ```markdown
-# AgentName - ClawKeeper Role
+# AgentName - TransactionWonder Role
 
 ## Identity
 You are **AgentName**, responsible for...
@@ -233,4 +233,4 @@ When implementing features, verify:
 
 ---
 
-Follow these guidelines to maintain ClawKeeper's security, precision, and reliability.
+Follow these guidelines to maintain TransactionWonder's security, precision, and reliability.

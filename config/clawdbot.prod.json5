@@ -1,7 +1,7 @@
-// ClawKeeper Clawdbot Configuration (Production Mode)
+// TransactionWonder Clawdbot Configuration (Production Mode)
 //
 // PRODUCTION MODE: For standalone customer deployments
-// - ClawKeeper runs as independent CEO agent (not under Axel)
+// - TransactionWonder runs as independent CEO agent (not under Axel)
 // - Operates own gateway and control UI
 // - Suitable for customer installations and production environments
 //
@@ -12,8 +12,8 @@
   routing: {
     agents: {
       main: {
-        name: "ClawKeeper",
-        workspace: "~/clawkeeper",
+        name: "TransactionWonder",
+        workspace: "~/transactionwonder",
         sandbox: { mode: "off" }
       }
     },
@@ -24,7 +24,7 @@
 
   // Session configuration
   session: {
-    mainKey: "main"  // ClawKeeper is main in prod mode
+    mainKey: "main"  // TransactionWonder is main in prod mode
   },
 
   // Heartbeat
@@ -86,8 +86,8 @@
     }
   },
 
-  // ClawKeeper-specific settings
-  clawkeeper: {
+  // TransactionWonder-specific settings
+  ceo: {
     mode: "prod",
     api_port: 4004,
     dashboard_port: 5174,

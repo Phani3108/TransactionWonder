@@ -1,4 +1,4 @@
--- ClawKeeper Performance Optimization Migration
+-- TransactionWonder Performance Optimization Migration
 -- Adds composite indexes for dashboard query optimization
 
 -- Critical composite indexes for dashboard queries

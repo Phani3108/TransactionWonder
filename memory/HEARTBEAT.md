@@ -1,8 +1,8 @@
-# ClawKeeper Heartbeat Protocol
+# TransactionWonder Heartbeat Protocol
 
 ## Purpose
 
-The heartbeat ensures ClawKeeper remains responsive, healthy, and aligned with its mission of precise financial automation.
+The heartbeat ensures TransactionWonder remains responsive, healthy, and aligned with its mission of precise financial automation.
 
 ## Heartbeat Schedule
 
@@ -63,7 +63,7 @@ INSERT INTO agent_runs (
   id, tenant_id, agent_id, task_id, status
 )
 VALUES (
-  uuid(), 'system', 'clawkeeper', 'heartbeat-{timestamp}', 'completed'
+  uuid(), 'system', 'ceo', 'heartbeat-{timestamp}', 'completed'
 );
 ```
 
@@ -82,4 +82,4 @@ If 3 consecutive heartbeats fail → Alert super_admin via email and Discord
 
 ---
 
-The heartbeat is ClawKeeper's self-awareness mechanism, ensuring continuous reliability.
+The heartbeat is TransactionWonder's self-awareness mechanism, ensuring continuous reliability.

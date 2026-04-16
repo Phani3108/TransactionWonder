@@ -1,5 +1,5 @@
 // file: src/demo/transform/invoices.ts
-// description: Transform invoice dataset to ClawKeeper schema
+// description: Transform invoice dataset to TransactionWonder schema
 // reference: transform/index.ts
 
 import { writeFileSync } from 'fs';

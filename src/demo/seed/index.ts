@@ -12,14 +12,14 @@ import { seed_transactions } from './transactions';
 import { seed_invoices } from './invoices';
 import { seed_agent_scenarios } from './agent_scenarios';
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://clawkeeper:clawkeeper_password@localhost:5432/clawkeeper';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://transactionwonder:transactionwonder_password@localhost:5432/transactionwonder';
 const GENERATED_DIR = join(__dirname, '../data/generated');
 const NORMALIZED_DIR = join(__dirname, '../transform/normalized');
 
 async function main() {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║  ClawKeeper Database Seeder                               ║
+║  TransactionWonder Database Seeder                               ║
 ║  Seeding demo data for 110 agents                         ║
 ╚═══════════════════════════════════════════════════════════╝
   `);

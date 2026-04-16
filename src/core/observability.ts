@@ -11,7 +11,7 @@ import type { TenantId, LedgerAgentId } from './types';
 
 const OPIK_ENABLED = process.env.OPIK_ENABLED === 'true';
 const OPIK_BASE_URL = process.env.OPIK_BASE_URL || 'http://localhost:5173/api';
-const OPIK_PROJECT_NAME = process.env.OPIK_PROJECT_NAME || 'clawkeeper';
+const OPIK_PROJECT_NAME = process.env.OPIK_PROJECT_NAME || 'ceo';
 
 let opik_client: Opik | null = null;
 

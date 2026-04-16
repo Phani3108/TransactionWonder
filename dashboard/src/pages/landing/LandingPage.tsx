@@ -264,7 +264,7 @@ export function LandingPage() {
 
   const testimonials = [
     {
-      quote: "ClawKeeper transforms how we manage our books. It’s no longer about manual entry, but strategic oversight.",
+      quote: "TransactionWonder transforms how we manage our books. It’s no longer about manual entry, but strategic oversight.",
       author: "Marcus Alvarez",
       role: "CFO, Stripe"
     },
@@ -274,7 +274,7 @@ export function LandingPage() {
       role: "VP Finance, Vercel"
     },
     {
-      quote: "We moved from reactive accounting to proactive financial planning. ClawKeeper is the backbone of our finance stack.",
+      quote: "We moved from reactive accounting to proactive financial planning. TransactionWonder is the backbone of our finance stack.",
       author: "David Ross",
       role: "Controller, Linear"
     }
@@ -311,7 +311,7 @@ export function LandingPage() {
             <CircleDashed className="w-3 h-3" />
           </div>
           <span className="font-sans text-sm font-bold tracking-tight text-obsidian">
-            CLAWKEEPER
+            TRANSACTIONWONDER
           </span>
         </div>
 
@@ -866,14 +866,14 @@ export function LandingPage() {
             <div className="max-w-xs space-y-6">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-obsidian rounded-sm"></div>
-                <span className="font-bold text-sm tracking-tight text-obsidian">CLAWKEEPER</span>
+                <span className="font-bold text-sm tracking-tight text-obsidian">TRANSACTIONWONDER</span>
               </div>
               <p className="text-xs text-subtle leading-relaxed">
                 Designed for the rigorous demands of modern enterprise finance.
                 San Francisco, CA.
               </p>
               <div className="text-[10px] text-border">
-                © 2026 ClawKeeper Systems Inc.
+                © 2026 TransactionWonder Systems Inc.
               </div>
             </div>
 

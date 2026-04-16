@@ -178,7 +178,7 @@ export class WorkerRegistry {
           name: this.format_name(worker_dir),
           description: `${this.format_name(worker_dir)} worker for ${domain}`,
           type: 'worker',
-          parent_id: DOMAIN_TO_PARENT[domain] || 'clawkeeper',
+          parent_id: DOMAIN_TO_PARENT[domain] || 'ceo',
           domain,
           capabilities,
         };

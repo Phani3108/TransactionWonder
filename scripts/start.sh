@@ -1,8 +1,8 @@
 #!/bin/bash
-# ClawKeeper Start Script
+# TransactionWonder Start Script
 # Starts API server and dashboard
 
-echo "🔐 Starting ClawKeeper..."
+echo "🔐 Starting TransactionWonder..."
 echo ""
 
 REPO_DIR="$(pwd)"
@@ -27,7 +27,7 @@ bun run dashboard:dev &
 DASHBOARD_PID=$!
 
 echo ""
-echo "✅ ClawKeeper started!"
+echo "✅ TransactionWonder started!"
 echo ""
 echo "Services:"
 echo "  API: http://localhost:${PORT:-4004}"

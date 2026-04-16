@@ -1,6 +1,6 @@
-# Contributing to ClawKeeper
+# Contributing to TransactionWonder
 
-Thank you for your interest in contributing to ClawKeeper! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to TransactionWonder! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 
@@ -21,12 +21,12 @@ By participating in this project, you agree to maintain a respectful and inclusi
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/ClawKeeper.git
-   cd clawkeeper
+   git clone https://github.com/YOUR_USERNAME/TransactionWonder.git
+   cd ceo
    ```
 3. **Add the upstream remote**:
    ```bash
-   git remote add upstream https://github.com/Alexi5000/ClawKeeper.git
+   git remote add upstream https://github.com/Alexi5000/TransactionWonder.git
    ```
 
 ## Development Environment
@@ -199,4 +199,4 @@ Include:
 
 Questions? Open a discussion on GitHub or reach out to the maintainers.
 
-Thank you for contributing to ClawKeeper! 🦀
+Thank you for contributing to TransactionWonder! 🦀

@@ -1,4 +1,4 @@
--- ClawKeeper Database Schema
+-- TransactionWonder Database Schema
 -- Multi-tenant bookkeeping system with RLS and RBAC
 
 -- Enable UUID extension

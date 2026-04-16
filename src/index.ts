@@ -1,5 +1,5 @@
 // file: src/index.ts
-// description: ClawKeeper main entry point - starts API server and agent runtime
+// description: TransactionWonder main entry point - starts API server and agent runtime
 // reference: src/api/server.ts, src/agents/index.ts
 
 import { agent_runtime } from './agents/index';
@@ -7,15 +7,15 @@ import { flush_opik } from './core/observability';
 
 console.log('');
 console.log('═'.repeat(50));
-console.log('  🔐 ClawKeeper');
+console.log('  🔐 TransactionWonder');
 console.log('  Autonomous AI Bookkeeping for SMBs');
 console.log('═'.repeat(50));
 console.log('');
 
-// Start ClawKeeper CEO agent
+// Start TransactionWonder CEO agent
 console.log('[Agents] Initializing agent runtime...');
-const clawkeeper = await agent_runtime.get_agent('clawkeeper');
-console.log('[Agents] ✅ ClawKeeper CEO agent: ONLINE');
+const ceo = await agent_runtime.get_agent('ceo');
+console.log('[Agents] ✅ TransactionWonder CEO agent: ONLINE');
 
 // Start Accounts Payable Lead
 try {
@@ -52,7 +52,7 @@ console.log(`[API]    Agents: http://localhost:${port}/api/agents/status`);
 
 console.log('');
 console.log('═'.repeat(50));
-console.log('  ✅ ClawKeeper is ONLINE');
+console.log('  ✅ TransactionWonder is ONLINE');
 console.log('═'.repeat(50));
 console.log('');
 console.log('Press Ctrl+C to stop');
@@ -62,7 +62,7 @@ process.on('SIGINT', async () => {
   console.log('\n\n🛑 Shutting down...');
   await flush_opik();
   await agent_runtime.stop_all();
-  console.log('👋 ClawKeeper stopped');
+  console.log('👋 TransactionWonder stopped');
   process.exit(0);
 });
 

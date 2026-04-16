@@ -1,4 +1,4 @@
-# ClawKeeper Startup Guide
+# TransactionWonder Startup Guide
 
 ## 🚀 Quick Start (3 Steps)
 
@@ -14,20 +14,20 @@ docker start techtide-postgres
 ### 2. Start API Server
 ```bash
 # In Terminal 1
-cd c:\TechTide\Apps\Clawkeeper
+cd c:\TechTide\Apps\TransactionWonder
 bun run dev
 ```
 
 **Expected output:**
 ```
-🔍 Validating ClawKeeper Configuration...
+🔍 Validating TransactionWonder Configuration...
 ✅ Configuration valid
    API Port:       4004
    Dashboard Port: 5174
    Database:       PostgreSQL on localhost:5432
 
 ╔═════════════════════════════════════════════════════════════════╗
-║  🔐 ClawKeeper API Server                                       ║
+║  🔐 TransactionWonder API Server                                       ║
 ╚═════════════════════════════════════════════════════════════════╝
 
 Port:        4004
@@ -45,7 +45,7 @@ Ready for requests...
 ### 3. Start Dashboard
 ```bash
 # In Terminal 2
-cd c:\TechTide\Apps\Clawkeeper
+cd c:\TechTide\Apps\TransactionWonder
 bun run dashboard:dev
 ```
 
@@ -113,7 +113,7 @@ docker ps | grep postgres
 docker start techtide-postgres
 
 # Test connection
-docker exec techtide-postgres psql -U clawkeeper -d clawkeeper -c "SELECT 1;"
+docker exec techtide-postgres psql -U transactionwonder -d transactionwonder -c "SELECT 1;"
 ```
 
 ### ❌ Dashboard can't connect to API

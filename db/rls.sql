@@ -1,4 +1,4 @@
--- ClawKeeper Row-Level Security (RLS) Policies
+-- TransactionWonder Row-Level Security (RLS) Policies
 -- Ensures tenant data isolation
 
 -- Enable RLS on all tenant-scoped tables
@@ -280,15 +280,15 @@ CREATE POLICY activity_log_insert ON activity_log
 -- Create a service role that can bypass RLS
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'clawkeeper_service') THEN
-        CREATE ROLE clawkeeper_service;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'transactionwonder_service') THEN
+        CREATE ROLE transactionwonder_service;
     END IF;
 END
 $$;
 
 -- Grant service role bypass privilege
-ALTER ROLE clawkeeper_service BYPASSRLS;
+ALTER ROLE transactionwonder_service BYPASSRLS;
 
 -- Service role needs access to all tables
-GRANT ALL ON ALL TABLES IN SCHEMA public TO clawkeeper_service;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO clawkeeper_service;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO transactionwonder_service;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO transactionwonder_service;

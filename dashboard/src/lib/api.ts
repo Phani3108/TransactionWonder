@@ -1,10 +1,10 @@
-// API client for ClawKeeper dashboard
+// API client for TransactionWonder dashboard
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9100';
 
 class ApiClient {
   private get_headers(): HeadersInit {
-    const token = localStorage.getItem('clawkeeper_token');
+    const token = localStorage.getItem('transactionwonder_token');
     return {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -50,7 +50,7 @@ class ApiClient {
     const form_data = new FormData();
     form_data.append('file', file);
 
-    const token = localStorage.getItem('clawkeeper_token');
+    const token = localStorage.getItem('transactionwonder_token');
     const response = await fetch(`${BASE_URL}/api/invoices/upload`, {
       method: 'POST',
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
@@ -225,7 +225,7 @@ class ApiClient {
     plan_id: string, 
     on_event: (event: OrchestrationEvent) => void
   ): Promise<OrchestrationResult> {
-    const token = localStorage.getItem('clawkeeper_token');
+    const token = localStorage.getItem('transactionwonder_token');
     
     const response = await fetch(`${BASE_URL}/api/agents/orchestrate/execute/${plan_id}/stream`, {
       method: 'POST',

@@ -1,6 +1,6 @@
 # 📒 TransactionWonder
 
-> An AI bookkeeping platform for small businesses — also known as **ClawKeeper**.
+> An AI bookkeeping platform for small businesses — autonomous, multi-tenant, and built for speed.
 
 This repo is being rebuilt in phases. Each phase lands as a clean, pushable slice so progress is easy to follow.
 
@@ -62,6 +62,7 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | Phase | Status | Summary |
 |---|---|---|
 | **P0-1** — Tenant context hardening | ✅ Done | Transaction-scoped RLS session vars. Fixes pool bleed + SET injection. |
+| **R** — Drop "ClawKeeper" brand | ✅ Done | Single name everywhere: **TransactionWonder**. CEO agent ID is now `ceo`. |
 | P0-2 — RLS isolation test suite | ⏳ Next | End-to-end tests for tenant A can’t read tenant B, etc. |
 | P0-3 — CEO → orchestrator real delegation | ⏳ Next | Replace the mock `delegate_to()` with a real call. |
 | P0-4 — Orchestrator → worker dispatch (AP Lead) | ⏳ Next | First vertical slice that actually uses workers. |
@@ -73,7 +74,29 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 
 ---
 
-## ✅ Latest phase: **P0-1 — Tenant context hardening** (2026-04-17)
+## ✅ Latest phase: **R — Drop "ClawKeeper" brand** (2026-04-17)
+
+### 🎯 What changed
+
+- ✏️ **315 references across 104 files** renamed in a single sweep — all prose, code, docs, SQL, config.
+- 🏷️ **Brand** is now just **TransactionWonder** everywhere (no more dual "TransactionWonder / ClawKeeper" split).
+- 🧑‍✈️ **CEO agent** is now identified as `ceo` instead of `clawkeeper` — same role, clearer name.
+  - Class renamed: `ClawKeeperAgent` → `CeoAgent`.
+  - File renamed: `src/agents/clawkeeper.ts` → `src/agents/ceo.ts`.
+  - Dir renamed: `agents/clawkeeper/` → `agents/ceo/`.
+  - Agent ID everywhere: `'clawkeeper'` → `'ceo'`.
+- 📦 **Packages** renamed: root `transactionwonder`, dashboard `transactionwonder-dashboard`.
+- 🗄️ **DB / service names** kept as the product name, not the agent name: `transactionwonder` database, `transactionwonder_service` role, etc.
+- ✅ Full TypeScript typecheck still clean on every changed file.
+
+### 🧪 Verification
+
+- `grep -r "ClawKeeper\|clawkeeper"` across the whole tree → **0 hits**.
+- No orphan references: `ceo` as an identifier only appears where it refers to the CEO agent role.
+
+---
+
+## 📜 Previous phase: **P0-1 — Tenant context hardening** (2026-04-17)
 
 ### 🐞 What was broken
 
@@ -99,7 +122,7 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 
 ```bash
 # Requires a running Postgres instance.
-DATABASE_URL=postgres://user:pass@localhost:5432/clawkeeper bun test tests/rls
+DATABASE_URL=postgres://user:pass@localhost:5432/transactionwonder bun test tests/rls
 ```
 
 The test suite self-skips if `DATABASE_URL` is not set, so CI without a DB still passes.

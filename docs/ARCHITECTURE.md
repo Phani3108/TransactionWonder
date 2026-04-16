@@ -1,8 +1,8 @@
-# ClawKeeper Architecture
+# TransactionWonder Architecture
 
 ## Overview
 
-ClawKeeper is a 110-agent AI system for autonomous bookkeeping, built on a multi-layer architecture with strict tenant isolation, comprehensive audit trails, and production-grade security.
+TransactionWonder is a 110-agent AI system for autonomous bookkeeping, built on a multi-layer architecture with strict tenant isolation, comprehensive audit trails, and production-grade security.
 
 ## System Layers
 
@@ -21,7 +21,7 @@ ClawKeeper is a 110-agent AI system for autonomous bookkeeping, built on a multi
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                    Agent Orchestration Layer                 │
-│  ClawKeeper CEO → 9 Orchestrators → 100 Workers             │
+│  TransactionWonder CEO → 9 Orchestrators → 100 Workers             │
 │  - Task decomposition - DAG execution - Result aggregation  │
 └─────────────────────────────────────────────────────────────┘
                             ↓
@@ -41,7 +41,7 @@ ClawKeeper is a 110-agent AI system for autonomous bookkeeping, built on a multi
 ## Agent Hierarchy
 
 ### Layer 1: CEO
-- **ClawKeeper** - Decomposes requests, routes to orchestrators, aggregates results
+- **TransactionWonder** - Decomposes requests, routes to orchestrators, aggregates results
 
 ### Layer 2: Orchestrators (9)
 1. **CFO** - Strategic planning, forecasting
@@ -73,7 +73,7 @@ Distributed across orchestrators:
 ```
 1. User uploads invoice PDF
 2. API receives file, creates task
-3. ClawKeeper receives task
+3. TransactionWonder receives task
 4. Decomposes: [OCR → Parse → Validate → Categorize → Approve → Pay]
 5. Routes to AP Lead
 6. AP Lead delegates to workers:
@@ -82,8 +82,8 @@ Distributed across orchestrators:
    - Expense Categorizer (GL coding)
    - Approval Router (workflow)
 7. Workers execute, results aggregate
-8. AP Lead returns to ClawKeeper
-9. ClawKeeper returns to API
+8. AP Lead returns to TransactionWonder
+9. TransactionWonder returns to API
 10. API returns to user
 11. Audit log captures all actions
 ```
@@ -168,8 +168,8 @@ Distributed across orchestrators:
 
 ## Deployment
 
-ClawKeeper runs as a standalone CEO agent:
-- Workspace: `~/clawkeeper`
+TransactionWonder runs as a standalone CEO agent:
+- Workspace: `~/transactionwonder`
 - Gateway: Own gateway (port 19789)
 - Use case: Customer deployments (white-labeled)
 
@@ -198,4 +198,4 @@ ClawKeeper runs as a standalone CEO agent:
 
 ---
 
-This architecture ensures ClawKeeper is production-ready, secure, and scalable for SMB financial automation.
+This architecture ensures TransactionWonder is production-ready, secure, and scalable for SMB financial automation.

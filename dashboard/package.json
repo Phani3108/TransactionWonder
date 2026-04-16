@@ -1,7 +1,7 @@
 {
-  "name": "clawkeeper-dashboard",
+  "name": "transactionwonder-dashboard",
   "version": "0.1.0",
-  "description": "ClawKeeper Admin Dashboard",
+  "description": "TransactionWonder Admin Dashboard",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
