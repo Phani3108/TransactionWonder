@@ -76,12 +76,28 @@ Each phase is a small, reviewable PR-sized change. One commit per phase, pushed 
 | **P1-10** — Orchestration retry | ✅ Done | Each task wrapped in `retryWithBackoff` with exponential backoff, full jitter, and classifier that skips domain-validation errors. |
 | **P1-11** — PII redaction on LLM path | ✅ Done | `llm.complete()` redacts PII by default (`redact_pii: true`). Opt-out for callers that pre-redact. |
 | **P1-5** — Remaining orchestrators dispatch | ✅ Done | CFO, AR Lead, Reconciliation, Compliance, Reporting, Integration, Data/ETL, Support all route via shared `_dispatch.ts` helper. |
-| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency (partial via P0-5), JWT refresh, remaining 6 skills. |
+| **P1-6** — Remaining 6 skills | ✅ Done | `document-parser`, `bank-reconciliation`, `compliance-checker`, `financial-reporting`, `data-sync`, `audit-trail` — all 8 skills now registered and callable via `invokeSkill()`. |
+| *Remaining P1 items* | 🗓️ Planned | OAuth token persistence, webhooks, Stripe idempotency hardening, JWT refresh. |
 | *P2 items* | 🗓️ Planned | Hygiene: redundant RLS policies, bcrypt rounds, trace.end() fix, doc drift, env template, pgcrypto, branded types. |
 
 ---
 
-## ✅ Latest phase: **P1-5 — Remaining 8 orchestrators wire to workers** (2026-04-17)
+## ✅ Latest phase: **P1-6 — Remaining 6 skills** (2026-04-17)
+
+### 🎯 What changed — every documented skill now has a live handler
+
+- 📄 **`document-parser`** — OCR shell. Returns synthetic output today; live Document AI wiring is tracked as P2 hygiene (integration client type reconciliation + real service-account auth).
+- 🏦 **`bank-reconciliation`** — Pulls transactions in range from the tenant-scoped pool, separates matched vs. unmatched, emits up to 50 discrepancies. RLS filters automatically; no tenant params in the SQL.
+- 🛡️ **`compliance-checker`** — Three rules today: existence, duplicate vendor+amount in last 90 days, approval-limit threshold. Returns typed issues with severities.
+- 📊 **`financial-reporting`** — Real SQL for `profit_loss`, `cash_flow`, `balance_sheet`. Runs through `ctx.sql` so RLS scopes results by tenant.
+- 🔄 **`data-sync`** — Returns `status: 'synthetic' | 'no_token' | 'ok'` based on configured creds. Becomes fully live once P1-2 (OAuth token manager) lands.
+- 🧾 **`audit-trail`** — INSERTs into `audit_log` via the tenant-scoped client. The table’s RLS `WITH CHECK` prevents forged cross-tenant entries even through this skill.
+
+All 8 skills are registered in `src/skills/index.ts`; any worker / agent / route can call `invokeSkill(name, input, ctx)` and get Zod-validated results with PII redaction applied at the executor layer.
+
+---
+
+## 📜 Previous phase: **P1-5 — Remaining 8 orchestrators wire to workers** (2026-04-17)
 
 ### 🎯 What changed
 

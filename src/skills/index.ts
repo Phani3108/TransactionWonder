@@ -6,11 +6,22 @@
 import { registerSkill } from './registry';
 import { invoiceProcessor } from './handlers/invoice-processor';
 import { paymentGateway } from './handlers/payment-gateway';
+import { documentParser } from './handlers/document-parser';
+import { bankReconciliation } from './handlers/bank-reconciliation';
+import { complianceChecker } from './handlers/compliance-checker';
+import { financialReporting } from './handlers/financial-reporting';
+import { dataSync } from './handlers/data-sync';
+import { auditTrail } from './handlers/audit-trail';
 
-// Auto-register known skills. When P1-6 lands (remaining 6 skills) they
-// each add one line here.
+// Auto-register known skills.
 registerSkill(invoiceProcessor);
 registerSkill(paymentGateway);
+registerSkill(documentParser);
+registerSkill(bankReconciliation);
+registerSkill(complianceChecker);
+registerSkill(financialReporting);
+registerSkill(dataSync);
+registerSkill(auditTrail);
 
 export { invokeSkill } from './executor';
 export { listSkills, getSkill, registerSkill } from './registry';
